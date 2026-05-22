@@ -127,10 +127,6 @@ Open MySQLWorkbench en importeer het SQL-bestand.
 
 Maak een kopie van _config_example.py_ met de naam _config.py_ en vul het paswoord voor de database aan.
 
-### Flask secret
-
-Pas in app.py het secret van de Flask server aan, naar een willekeurige string
-
 ## Demo project testen
 
 **Backend**
