@@ -7,3 +7,7 @@
 **Projectsamenvatting in max 10 woorden:** E
 
 **Projecttitel:** F
+
+___
+
+**Korte omschrijving van het project**
