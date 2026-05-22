@@ -138,6 +138,7 @@ async def root():
 
 @app.patch(ENDPOINT + "/lampen/{lamp_id}/status/", response_model=LampStatus, summary="Update lamp status")
 async def update_lamp_status(lamp_id: int, status: DTOLampStatus):
+    global led_state
     print(f"[RESTAPI] => Lamp {lamp_id} naar {status.nieuwe_status}")
     DataRepository.update_status_lamp(lamp_id, status.nieuwe_status)
 
