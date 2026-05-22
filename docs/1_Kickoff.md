@@ -38,11 +38,12 @@ Je kan dus een speciaal Micro SD kaartje maken om de firmware van uw RPi up te d
 ### Downloaden van de image ⏳
 
 - Download _[de gezipte image](https://studenthowest-my.sharepoint.com/:u:/g/personal/pieter-jan_beeckman_howest_be/IQAgDln3zlRISqIJFI-VKmfoAWP40Q-G0mbHid4Fr050h4Y?e=ACxvx9)_ naar je lokale computer.
+- Ook beschikbaar via: [Google Drive](https://drive.google.com/file/d/141NGuiJ8vWFgteA2qFJmEGRdCQgy-4DX/view?usp=sharing) of [transfernow](https://www.transfernow.net/dl/P1_MCT_2026) of [transferxl](https://www.transferxl.com/download/08vp16hhMBjs20)
 
 ### Terugzetten van de image ⏳
 
 - ⚠ Unzip het bestand ⚠
-- Plaats het bestand op een SD-kaartje van minstens 8GB (16GB) met Win32 Imager of Balena Etcher.
+- Plaats het bestand op een SD-kaartje van minstens 16GB met Win32 Imager of Balena Etcher.
 - Nadat de image geschreven is, kan je het SD-kaartje verwijderen en in je Pi steken.
 
 ### Pi koppelen
