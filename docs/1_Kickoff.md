@@ -57,6 +57,7 @@ Je kan dus een speciaal Micro SD kaartje maken om de firmware van uw RPi up te d
 - _Na het inloggen moet je eerst nieuw wachtwoord instellen voor student gebruiker_
 - `ssh student@192.168.168.169` ; huidig wachtwoord _P@ssw0rd_ ; nieuw wachtwoord en bevestigen
 - log opnieuw in met nieuw wachtwoord
+- Stel via _sudo raspi-config_ in om automatisch naar Desktop op te starten (boot to Desktop), en ook Auto login naar Desktop te activeren
 - ⚠ REBOOT de Pi (Dit kan enkele minuten duren opnieuw)
 
 ---
@@ -70,7 +71,7 @@ Je kan dus een speciaal Micro SD kaartje maken om de firmware van uw RPi up te d
 
 (reeds gedana of je hebt dit document niet)
 
-Accepteer de invite url: [CLASSROOM](https://classroom.github.com/a/3T1YfLdF)
+Accepteer de invite url: [CLASSROOM](https://classroom.github.com/a/PgibriZd)
 
 Open een nieuwe venster van vscode, en verbind met 192.168.168.169
 
@@ -78,7 +79,7 @@ Nadien kan je via de sourcecontrol tab binnen vscode de repo clonen
 
 Voor de KICKOFF clone de repo naar ~/kickoff
 
-(De repo map zal dan ~/kickoff/2024-2025-projectone-mct-uwnaam)
+(De repo map zal dan ~/kickoff/2025-2026-projectone-mct-uwnaam)
 
 **Gebruik de https:// versie, niet de ssh://**
 
