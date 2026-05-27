@@ -36,7 +36,7 @@
 
 Lector: Stijn Walcarius
 
-Vragen voor dit gesprek: Feedback op mijn database
+Vragen voor dit gesprek:
 
 - vraag 1: Kan ik feedback krijgen op mijn EERD? Is mijn database goed?
 
