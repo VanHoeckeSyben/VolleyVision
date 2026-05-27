@@ -42,7 +42,8 @@ Vragen voor dit gesprek:
 
 Dit is de feedback op mijn vragen.
 
-- feedback 1: Type device (sensor, actuator) in een aparte tabel plaatsen, speler naam opdelen in naam en voornaam
+- feedback 1: Type device (sensor, actuator) in een aparte tabel plaatsen
+- feedback 2: Speler naam opdelen in naam en voornaam
 
 ## Gesprek 2 (Datum: xx/xx/2024)
 
