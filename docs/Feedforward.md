@@ -1,12 +1,12 @@
 # Projectgegevens
 
-**VOORNAAM NAAM:** A B
+**VOORNAAM NAAM:** Syben Van Hoecke
 
-**Sparringpartner:** C D
+**Sparringpartner:** Thomas Van Haute
 
-**Projectsamenvatting in max 10 woorden:** E
+**Projectsamenvatting in max 10 woorden:** Voetfout detectie systeem om scheidsrechters te helpen in volleybal matchen
 
-**Projecttitel:** F
+**Projecttitel:** VolleyVision
 
 # Tips voor feedbackgesprekken
 
@@ -32,17 +32,17 @@
 
 # Feedforward gesprekken
 
-## Gesprek 1 (Datum: xx/xx/2024)
+## Gesprek 1 (Consult) (Datum: 27/05/2026)
 
-Lector:
+Lector: Stijn Walcarius
 
-Vragen voor dit gesprek:
+Vragen voor dit gesprek: Feedback op mijn database
 
-- vraag 1: V
+- vraag 1: Kan ik feedback krijgen op mijn EERD? Is mijn database goed?
 
 Dit is de feedback op mijn vragen.
 
-- feedback 1: G
+- feedback 1: Type device (sensor, actuator) in een aparte tabel plaatsen, speler naam opdelen in naam en voornaam
 
 ## Gesprek 2 (Datum: xx/xx/2024)
 
