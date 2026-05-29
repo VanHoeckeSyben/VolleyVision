@@ -52,7 +52,7 @@ Lector: Geert Desloovere
 Vragen voor dit gesprek:
 
 - vraag 1: Kan ik feedback krijgen op mijn aangepaste fritzing schema's?
-- vraag 2: Kan ik feedbac krijgen op mijn behuizing?
+- vraag 2: Kan ik feedback krijgen op mijn behuizing?
 - vraag 3: Mag ik magneten gebruiken om de behuizing dicht te maken?
 - vraag 4: Hoe los ik op dat mijn lasersensor in een hoek meet in plaats van in één rechte lijn?
 
@@ -60,10 +60,10 @@ Dit is de feedback op mijn vragen.
 
 - feedback 1: Kleuren van de speaker kabels aanpassen
 - feedback 2: kabels recht zetten op schema
-- feedback 3: haakje printen op bovenkant van de doos zodat deze niet verschuift met de magneten
-- feedback 4: een tunnel rond de lasersensor maken van ongeveer 2-3 cm om in één lijn te meten.
+- feedback 3: Haakje printen op bovenkant van de doos zodat deze niet verschuift met de magneten
+- feedback 4: Een tunnel rond de lasersensor maken van ongeveer 2-3 cm om in één lijn te meten.
 
-## Gesprek 3 (Datum: 29/05/2026)
+## Gesprek 3 (Consult) (Datum: 29/05/2026)
 
 Lector: Christophe Laprudence
 
