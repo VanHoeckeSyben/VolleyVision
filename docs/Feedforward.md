@@ -1,12 +1,12 @@
 # Projectgegevens
 
-**VOORNAAM NAAM:** A B
+**VOORNAAM NAAM:** Syben Van Hoecke
 
-**Sparringpartner:** C D
+**Sparringpartner:** Thomas Van Haute
 
-**Projectsamenvatting in max 10 woorden:** E
+**Projectsamenvatting in max 10 woorden:** Voetfout detectie systeem om scheidsrechters te helpen in volleybal matchen
 
-**Projecttitel:** F
+**Projecttitel:** VolleyVision
 
 # Tips voor feedbackgesprekken
 
@@ -32,38 +32,53 @@
 
 # Feedforward gesprekken
 
-## Gesprek 1 (Datum: xx/xx/2024)
+## Gesprek 1 (Consult) (Datum: 27/05/2026)
 
-Lector:
-
-Vragen voor dit gesprek:
-
-- vraag 1: V
-
-Dit is de feedback op mijn vragen.
-
-- feedback 1: G
-
-## Gesprek 2 (Datum: xx/xx/2024)
-
-Lector:
+Lector: Stijn Walcarius
 
 Vragen voor dit gesprek:
 
-- vraag 1: V
+- vraag 1: Kan ik feedback krijgen op mijn EERD? Is mijn database goed?
 
 Dit is de feedback op mijn vragen.
 
-- feedback 1: G
+- feedback 1: Type device (sensor, actuator) in een aparte tabel plaatsen
+- feedback 2: Speler naam opdelen in naam en voornaam
 
-## Gesprek 3 (Datum: xx/xx/2024)
+## Gesprek 2 (Consult) (Datum: 29/05/2026)
 
-Lector:
+Lector: Geert Desloovere
 
 Vragen voor dit gesprek:
 
-- [x] vraag 1: V
+- vraag 1: Kan ik feedback krijgen op mijn aangepaste fritzing schema's?
+- vraag 2: Kan ik feedback krijgen op mijn behuizing?
+- vraag 3: Mag ik magneten gebruiken om de behuizing dicht te maken?
+- vraag 4: Hoe los ik op dat mijn lasersensor in een hoek meet in plaats van in één rechte lijn?
 
 Dit is de feedback op mijn vragen.
 
-- feedback 1: G
+- feedback 1: Kleuren van de speaker kabels aanpassen
+- feedback 2: kabels recht zetten op schema
+- feedback 3: Haakje printen op bovenkant van de doos zodat deze niet verschuift met de magneten
+- feedback 4: Een tunnel rond de lasersensor maken van ongeveer 2-3 cm om in één lijn te meten.
+
+## Gesprek 3 (Consult) (Datum: 29/05/2026)
+
+Lector: Christophe Laprudence
+
+Vragen voor dit gesprek:
+
+- vraag 1: Kan ik feedback krijgen op mijn UI tekeningen?
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Duidelijkere knop voor als je opslag hebt
+- feedback 2: Er is nog geen knop om de volgende opslaggevers te kiezen/door te schuiven
+- feedback 3: Ook de vorige en volgende opslaggever tonen
+- feedback 4: Terug knoppen toevoegen in alle schermen
+- feedback 5: Dashboard kleiner maken
+- feedback 6: Als match bezig is, toon dan een melding bij het dashboard
+- feedback 7: Pop-up toevoegen als je het systeem wil afsluiten
+- feedback 8: Match naam toevoegen
+- feedback 9: Bij lange tabellen, bepaalde zaken op display none zetten
