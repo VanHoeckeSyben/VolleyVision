@@ -82,3 +82,27 @@ Dit is de feedback op mijn vragen.
 - feedback 7: Pop-up toevoegen als je het systeem wil afsluiten
 - feedback 8: Match naam toevoegen
 - feedback 9: Bij lange tabellen, bepaalde zaken op display none zetten
+
+## Gesprek 4 (Toermoment) (Datum: 02/06/2026)
+
+Lector: Christophe Laprudence, Dieter Roobrouck, Frederiek Berthier
+
+Vragen voor dit gesprek:
+
+- vraag 1: /
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Database: tabel match meer centraler zetten. Match verbinden met serve
+
+## Gesprek 5 (Consult) (Datum: 03/06/2026)
+
+Lector: Frederiek Berthier
+
+Vragen voor dit gesprek:
+
+- vraag 1: Kan ik feedback krijgen op mijn aangpaste database?
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Alles goed
