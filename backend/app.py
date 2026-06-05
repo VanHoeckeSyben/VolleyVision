@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers
 from RPi import GPIO
 from datetime import date, datetime
 
@@ -83,6 +83,20 @@ async def read_alle_serves():
         list_serves.append(serve)
         
     return Serves(serves=list_serves)
+
+@app.get(ENDPOINT + "/spelers", response_model=Spelers, summary="Ophalen van alle spelers")
+async def read_alle_spelers():
+    data = DataRepository.read_alle_spelers()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="spelers niet gevonden")
+    
+    list_spelers = []
+    for item in data:
+        speler = Speler(speler_id=int(item["speler_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), positie=item["positie"], active=int(item["active"]))
+        list_spelers.append(speler)
+        
+    return Spelers(spelers=list_spelers)
 
 # ----------------------------------------------------
 # Socket.IO Handlers

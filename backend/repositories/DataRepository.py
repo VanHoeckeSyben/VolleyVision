@@ -11,3 +11,8 @@ class DataRepository:
     def read_alle_serves():
         sql = "SELECT * FROM Serves"
         return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_alle_spelers():
+        sql = "SELECT * FROM Spelers"
+        return Database.get_rows(sql)
