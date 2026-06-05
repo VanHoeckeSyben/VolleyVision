@@ -127,7 +127,7 @@ async def read_speler_by_id(speler_id: int):
         
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
-@app.get(ENDPOINT + "/spelers/actief", response_model=Spelers, summary="Ophalen van alle actieve spelers")
+@app.get(ENDPOINT + "/actievespelers", response_model=Spelers, summary="Ophalen van alle actieve spelers")
 async def read_alle_actieve_spelers():
     data = DataRepository.read_alle_actieve_spelers()
     
