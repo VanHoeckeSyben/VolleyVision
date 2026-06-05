@@ -8,8 +8,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers
-from RPi import GPIO
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen
+# from RPi import GPIO
 from datetime import date, datetime
 
 
@@ -153,6 +153,30 @@ async def read_match_opstelling(match_id: int):
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
+
+@app.get(ENDPOINT + "/instellingen", response_model=Instellingen, summary="Ophalen van alle instellingen")
+async def read_alle_instellingen():
+    data = DataRepository.read_alle_instellingen()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instellingen niet gevonden")
+    
+    list_instellingen = []
+    for item in data:
+        instelling = Instelling(instelling_id=int(item["setting_id"]), naam=item["setting_naam"], value=item["setting_value"])
+        list_instellingen.append(instelling)
+        
+    return Instellingen(instellingen=list_instellingen)
+
+@app.get(ENDPOINT + "/instellingen/{instelling_id}", response_model=Instelling, summary="Ophalen van een instelling met id")
+async def read_instelling(instelling_id: int):
+    data = DataRepository.read_instelling_by_id(instelling_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instelling niet gevonden")
+
+        
+    return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
 
 # ----------------------------------------------------
 # Socket.IO Handlers

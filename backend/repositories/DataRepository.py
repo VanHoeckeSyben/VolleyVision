@@ -36,4 +36,15 @@ class DataRepository:
     def read_opstelling_by_match_id(match_id):
         sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstelling o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
         params = [match_id]
-        return Database.get_rows(sql, params)
+        return Database.get_one_row(sql, params)
+    
+    @staticmethod
+    def read_alle_instellingen():
+        sql = "SELECT * FROM settings"
+        return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_instelling_by_id(instelling_id):
+        sql = "SELECT * FROM settings WHERE setting_id = %s"
+        params = [instelling_id]
+        return Database.get_one_row(sql, params)

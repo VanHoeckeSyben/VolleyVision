@@ -49,3 +49,11 @@ class OpstellingSpeler(BaseModel):
     
 class OpstellingSpelers(BaseModel):
     Speler_opstellingen: list[OpstellingSpeler]
+    
+class Instelling(BaseModel):
+    instelling_id: int
+    naam: str
+    value: int
+    
+class Instellingen(BaseModel):
+    instellingen: list[Instelling]
