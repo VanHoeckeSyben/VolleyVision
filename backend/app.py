@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents
 # from RPi import GPIO
 from datetime import date, datetime
 
@@ -55,6 +55,8 @@ ENDPOINT = "/api/v1"  # Define the endpoint for the API
 # ----------------------------------------------------
 # FastAPI Endpoints
 # ----------------------------------------------------
+
+# Read
 
 @app.get(ENDPOINT + "/matchen", response_model=Matchen, summary="Ophalen van alle matchen")
 async def read_alle_matchen():
@@ -204,6 +206,83 @@ async def read_instelling(instelling_id: int):
 
     return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
 
+# Toevoegen
+
+@app.post(ENDPOINT + "/matchen", response_model=Match, summary="Match toevoegen")
+async def add_speler(match_gegevens: DTOMatch):
+    response_id = DataRepository.add_match(match_gegevens.match_naam, datetime.now().date(), match_gegevens.locatie)
+    
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+    
+    data = DataRepository.read_match_by_id(response_id)
+    
+    if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+            
+    return Match(match_id=int(data["match_id"]), match_naam=data["match_naam"], datum=data["datum"], locatie=data["locatie"])
+
+@app.post(ENDPOINT + "/spelers", response_model=Speler, summary="Speler toevoegen")
+async def add_speler(match_gegevens: DTOSpeler):
+    response_id = DataRepository.add_speler(match_gegevens.naam, match_gegevens.voornaam, match_gegevens.rugnummer, match_gegevens.positie)
+    
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+    
+    data = DataRepository.read_speler_by_id(response_id)
+    
+    if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+            
+    return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
+
+@app.post(ENDPOINT + "/opstelling", response_model=OpstellingSpelers, summary="Opstelling speler toevoegen")
+async def add_speler(opstelling_gegevens: DTOOpstelling):
+    response_id = DataRepository.add_opstelling(opstelling_gegevens.match_id, opstelling_gegevens.speler_id, opstelling_gegevens.veld_positie)
+    
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Opstelling speler niet gevonden")
+    
+    data = DataRepository.read_opstelling_by_match_id(opstelling_gegevens.match_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+    
+    list_opstellingen = []
+    for item in data:
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        list_opstellingen.append(opstelling)
+        
+    return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
+
+@app.post(ENDPOINT + "/serves", response_model=Serve, summary="Serve toevoegen")
+async def add_speler(serve_gegevens: DTOServe):
+    response_id = DataRepository.add_serve(serve_gegevens.speler_id, serve_gegevens.match_id, serve_gegevens.start_tijd, serve_gegevens.eind_tijd)
+
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Serve niet gevonden")
+
+    data = DataRepository.read_serve_by_id(response_id)
+
+    if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Serve niet gevonden")
+
+    return Serve(serve_id=int(data["serve_id"]), speler_id=int(data["speler_id"]), match_id=int(data["match_id"]), start_tijd=data["start_tijd"], eind_tijd=data["eind_tijd"])
+    
+@app.post(ENDPOINT + "/sensorevents", response_model=SensorEvent, summary="Sensorevent toevoegen")
+async def add_speler(sensorevents_gegevens: DTOSensorEvent):
+    response_id = DataRepository.add_sensorevent(sensorevents_gegevens.serve_id, sensorevents_gegevens.device_id, sensorevents_gegevens.waarde, sensorevents_gegevens.event_tijd)
+
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensorevent niet gevonden")
+
+    data = DataRepository.read_sensorevent_by_id(response_id)
+
+    if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensorevent niet gevonden")
+
+    return SensorEvent(event_id=int(data["event_id"]), serve_id=int(data["serve_id"]), device_id=int(data["device_id"]), waarde=float(data["waarde"]), event_tijd=data["event_tijd"])
+    
 # ----------------------------------------------------
 # Socket.IO Handlers
 # ----------------------------------------------------

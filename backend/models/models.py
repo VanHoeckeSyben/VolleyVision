@@ -57,3 +57,40 @@ class Instelling(BaseModel):
     
 class Instellingen(BaseModel):
     instellingen: list[Instelling]
+    
+class DTOMatch(BaseModel):
+    match_naam: str | None
+    locatie: str
+    
+class DTOSpeler(BaseModel):
+    naam: str
+    voornaam: str
+    rugnummer: int
+    positie: str
+    
+class DTOOpstelling(BaseModel):
+    match_id: int
+    speler_id: int
+    veld_positie: int
+    
+class DTOServe(BaseModel):
+    speler_id: int
+    match_id: int
+    start_tijd: datetime
+    eind_tijd: datetime
+    
+class DTOSensorEvent(BaseModel):
+    serve_id: int
+    device_id: int
+    waarde: float
+    event_tijd: datetime
+    
+class SensorEvent(BaseModel):
+    event_id: int
+    serve_id: int
+    device_id: int
+    waarde: float
+    event_tijd: datetime
+    
+class SensorEvents(BaseModel):
+    sensorevents: list[SensorEvent]

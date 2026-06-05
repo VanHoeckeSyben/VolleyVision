@@ -54,7 +54,7 @@ class DataRepository:
     def read_opstelling_by_match_id(match_id):
         sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstelling o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
         params = [match_id]
-        return Database.get_one_row(sql, params)
+        return Database.get_rows(sql, params)
     
     @staticmethod
     def read_alle_instellingen():
@@ -66,3 +66,44 @@ class DataRepository:
         sql = "SELECT * FROM settings WHERE setting_id = %s"
         params = [instelling_id]
         return Database.get_one_row(sql, params)
+    
+    @staticmethod
+    def add_match(match_naam, datum, locatie):
+        sql = "INSERT INTO matchen (match_naam, datum, locatie) VALUES (%s, %s, %s)"
+        params = [match_naam, datum, locatie]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def add_speler(naam, voornaam, rugnummer, positie):
+        sql = "INSERT INTO spelers (naam, voornaam, rugnummer, positie, active) VALUES (%s, %s, %s, %s, 1)"
+        params = [naam, voornaam, rugnummer, positie]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def add_opstelling(match_id, speler_id, veld_positie):
+        sql = "INSERT INTO opstelling (match_id, speler_id, veld_positie) VALUES (%s, %s, %s)"
+        params = [match_id, speler_id, veld_positie]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def add_serve(speler_id, match_id, start_tijd, eind_tijd):
+        sql = "INSERT INTO serves (speler_id, match_id, start_tijd, eind_tijd) VALUES (%s, %s, %s, %s)"
+        params = [speler_id, match_id, start_tijd, eind_tijd]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def add_sensorevent(serve_id, device_id, waarde, event_tijd):
+        sql = "INSERT INTO sensorevents (serve_id, device_id, waarde, event_tijd) VALUES (%s, %s, %s, %s)"
+        params = [serve_id, device_id, waarde, event_tijd]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def read_sensorevent_by_id(event_id):
+        sql = "SELECT * FROM sensorevents WHERE event_id = %s"
+        params = [event_id]
+        return Database.get_one_row(sql, params)
+    
+    @staticmethod
+    def read_alle_sensorevents():
+        sql = "SELECT * FROM sensorevents"
+        return Database.get_rows(sql)
