@@ -6,6 +6,12 @@ class DataRepository:
     def read_alle_matchen():
         sql = "SELECT * FROM Matchen"
         return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_match_by_id(match_id):
+        sql = "SELECT * FROM Matchen WHERE match_id = %s"
+        params = [match_id]
+        return Database.get_one_row(sql, params)
 
     @staticmethod
     def read_alle_serves():

@@ -70,6 +70,15 @@ async def read_alle_matchen():
 
     return Matchen(matchen=list_matchen)
 
+@app.get(ENDPOINT + "/matchen/{match_id}", response_model=Match, summary="Ophalen van match met match id")
+async def read_match_by_id(match_id: int):
+    data = DataRepository.read_match_by_id(match_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match niet gevonden")
+
+    return Match(match_id=int(data["match_id"]), match_naam=data["match_naam"], datum=data["datum"], locatie=data["locatie"])
+
 @app.get(ENDPOINT + "/serves", response_model=Serves, summary="Ophalen van alle serves")
 async def read_alle_serves():
     data = DataRepository.read_alle_serves()
@@ -175,7 +184,6 @@ async def read_instelling(instelling_id: int):
     if not data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instelling niet gevonden")
 
-        
     return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
 
 # ----------------------------------------------------
