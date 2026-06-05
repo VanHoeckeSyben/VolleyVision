@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices
 from RPi import GPIO
 from datetime import date, datetime
 
@@ -89,7 +89,7 @@ async def read_alle_spelers():
     data = DataRepository.read_alle_spelers()
     
     if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="spelers niet gevonden")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Spelers niet gevonden")
     
     list_spelers = []
     for item in data:
@@ -103,7 +103,7 @@ async def read_alle_actieve_spelers():
     data = DataRepository.read_alle_actieve_spelers()
     
     if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="spelers niet gevonden")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Spelers niet gevonden")
     
     list_spelers = []
     for item in data:
@@ -111,6 +111,20 @@ async def read_alle_actieve_spelers():
         list_spelers.append(speler)
         
     return Spelers(spelers=list_spelers)
+
+@app.get(ENDPOINT + "/devices", response_model=Devices, summary="Ophalen van alle devices")
+async def read_alle_devices():
+    data = DataRepository.read_alle_devices()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Devices niet gevonden")
+    
+    list_devices = []
+    for item in data:
+        device = Device(device_id=int(item["device_id"]), device_type_id=int(item["device_type_id"]), naam=item["naam"], beschrijving=item["beschrijving"])
+        list_devices.append(device)
+        
+    return Devices(devices=list_devices)
 
 # ----------------------------------------------------
 # Socket.IO Handlers

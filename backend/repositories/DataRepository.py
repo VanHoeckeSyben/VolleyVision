@@ -21,3 +21,8 @@ class DataRepository:
     def read_alle_actieve_spelers():
         sql = "SELECT * FROM Spelers WHERE active = 1"
         return Database.get_rows(sql)
+
+    @staticmethod
+    def read_alle_devices():
+        sql = "SELECT * FROM Devices"
+        return Database.get_rows(sql)

@@ -30,3 +30,12 @@ class Speler(BaseModel):
     
 class Spelers(BaseModel):
     spelers: list[Speler]
+    
+class Device(BaseModel):
+    device_id: int
+    device_type_id: int
+    naam: str
+    beschrijving: str
+    
+class Devices(BaseModel):
+    devices: list[Device]
