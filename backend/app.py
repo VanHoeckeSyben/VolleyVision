@@ -93,6 +93,15 @@ async def read_alle_serves():
         
     return Serves(serves=list_serves)
 
+@app.get(ENDPOINT + "/serves/{serve_id}", response_model=Serve, summary="Ophalen van serve met id")
+async def read_serve_by_id(serve_id: int):
+    data = DataRepository.read_serve_by_id(serve_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="serve niet gevonden")
+        
+    return Serve(serve_id=int(data["serve_id"]), speler_id=int(data["speler_id"]), match_id=int(data["match_id"]), start_tijd=data["start_tijd"], eind_tijd=data["eind_tijd"])
+
 @app.get(ENDPOINT + "/spelers", response_model=Spelers, summary="Ophalen van alle spelers")
 async def read_alle_spelers():
     data = DataRepository.read_alle_spelers()
@@ -106,6 +115,15 @@ async def read_alle_spelers():
         list_spelers.append(speler)
         
     return Spelers(spelers=list_spelers)
+
+@app.get(ENDPOINT + "/spelers/{speler_id}", response_model=Speler, summary="Ophalen van speler met speler id")
+async def read_speler_by_id(speler_id: int):
+    data = DataRepository.read_speler_by_id(speler_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+        
+    return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
 @app.get(ENDPOINT + "/spelers/actief", response_model=Spelers, summary="Ophalen van alle actieve spelers")
 async def read_alle_actieve_spelers():

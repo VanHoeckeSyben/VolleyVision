@@ -19,9 +19,21 @@ class DataRepository:
         return Database.get_rows(sql)
     
     @staticmethod
+    def read_serve_by_id(serve_id):
+        sql = "SELECT * FROM Serves WHERE serve_id = %s"
+        params = [serve_id]
+        return Database.get_one_row(sql, params)
+    
+    @staticmethod
     def read_alle_spelers():
         sql = "SELECT * FROM Spelers"
         return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_speler_by_id(speler_id):
+        sql = "SELECT * FROM Spelers WHERE speler_id = %s"
+        params = [speler_id]
+        return Database.get_one_row(sql, params)
     
     @staticmethod
     def read_alle_actieve_spelers():
