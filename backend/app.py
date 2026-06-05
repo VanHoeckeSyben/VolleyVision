@@ -98,6 +98,20 @@ async def read_alle_spelers():
         
     return Spelers(spelers=list_spelers)
 
+@app.get(ENDPOINT + "/spelers/actief", response_model=Spelers, summary="Ophalen van alle actieve spelers")
+async def read_alle_actieve_spelers():
+    data = DataRepository.read_alle_actieve_spelers()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="spelers niet gevonden")
+    
+    list_spelers = []
+    for item in data:
+        speler = Speler(speler_id=int(item["speler_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), positie=item["positie"], active=int(item["active"]))
+        list_spelers.append(speler)
+        
+    return Spelers(spelers=list_spelers)
+
 # ----------------------------------------------------
 # Socket.IO Handlers
 # ----------------------------------------------------
