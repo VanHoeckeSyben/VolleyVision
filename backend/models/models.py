@@ -94,3 +94,13 @@ class SensorEvent(BaseModel):
     
 class SensorEvents(BaseModel):
     sensorevents: list[SensorEvent]
+    
+class DTOInstelling(BaseModel):
+    naam: str
+    value: int
+    
+class DTOPatchOpstelling(BaseModel):
+    veld_positie: int
+    
+class DTOPatchSpeler(BaseModel):
+    actief: int

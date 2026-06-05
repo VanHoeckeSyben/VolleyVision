@@ -107,3 +107,27 @@ class DataRepository:
     def read_alle_sensorevents():
         sql = "SELECT * FROM sensorevents"
         return Database.get_rows(sql)
+    
+    @staticmethod
+    def update_speler(naam, voornaam, rugnummer, positie, speler_id):
+        sql = "UPDATE spelers SET naam = %s, voornaam = %s, rugnummer = %s, positie = %s WHERE speler_id = %s"
+        params = [naam, voornaam, rugnummer, positie, speler_id]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def update_instelling(naam, value, instelling_id):
+        sql = "UPDATE settings SET setting_naam = %s, setting_value = %s WHERE setting_id = %s"
+        params = [naam, value, instelling_id]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def patch_opstelling(veld_positie, match_id, speler_id):
+        sql = "UPDATE opstelling SET veld_positie = %s WHERE match_id = %s AND speler_id = %s"
+        params = [veld_positie, match_id, speler_id]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def patch_speler(actief, speler_id):
+        sql = "UPDATE spelers SET active = %s WHERE speler_id = %s"
+        params = [actief, speler_id]
+        return Database.execute_sql(sql, params)
