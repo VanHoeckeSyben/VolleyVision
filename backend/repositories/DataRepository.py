@@ -26,3 +26,14 @@ class DataRepository:
     def read_alle_devices():
         sql = "SELECT * FROM Devices"
         return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_alle_match_opstellingen():
+        sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstelling o INNER JOIN Spelers s ON o.speler_id = s.speler_id"
+        return Database.get_rows(sql)
+    
+    @staticmethod
+    def read_opstelling_by_match_id(match_id):
+        sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstelling o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
+        params = [match_id]
+        return Database.get_rows(sql, params)

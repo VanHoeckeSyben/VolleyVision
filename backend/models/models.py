@@ -39,3 +39,13 @@ class Device(BaseModel):
     
 class Devices(BaseModel):
     devices: list[Device]
+    
+class OpstellingSpeler(BaseModel):
+    match_id: int
+    naam: str
+    voornaam: str
+    rugnummer: int
+    veld_positie: int
+    
+class OpstellingSpelers(BaseModel):
+    Speler_opstellingen: list[OpstellingSpeler]

@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers
 from RPi import GPIO
 from datetime import date, datetime
 
@@ -125,6 +125,34 @@ async def read_alle_devices():
         list_devices.append(device)
         
     return Devices(devices=list_devices)
+
+@app.get(ENDPOINT + "/opstelling", response_model=OpstellingSpelers, summary="Ophalen van alle match opstellingen")
+async def read_alle_match_opstellingen():
+    data = DataRepository.read_alle_match_opstellingen()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Opstellingen niet gevonden")
+    
+    list_opstellingen = []
+    for item in data:
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        list_opstellingen.append(opstelling)
+        
+    return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
+
+@app.get(ENDPOINT + "/opstelling/{match_id}", response_model=OpstellingSpelers, summary="Ophalen van match opstelling met match id")
+async def read_match_opstelling(match_id: int):
+    data = DataRepository.read_opstelling_by_match_id(match_id)
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+    
+    list_opstellingen = []
+    for item in data:
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        list_opstellingen.append(opstelling)
+        
+    return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
 
 # ----------------------------------------------------
 # Socket.IO Handlers
