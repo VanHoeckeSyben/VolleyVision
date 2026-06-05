@@ -106,3 +106,31 @@ Vragen voor dit gesprek:
 Dit is de feedback op mijn vragen.
 
 - feedback 1: Alles goed
+
+## Gesprek 6 (Consult) (Datum: 04/06/2026)
+
+Lector: Stijn Walcarius
+
+Vragen voor dit gesprek:
+
+- vraag 1: In mijn project zit ik soms met missende data, zet ik die gegevens gewoon op nul of gebruik ik een andere techniek zoals interpolatie?
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Op 0 zetten want het gaat hier niet om echte metingen.
+
+## Gesprek 7 (Consult) (Datum: 04/06/2026)
+
+Lector: Christophe Laprudence
+
+Vragen voor dit gesprek:
+
+- vraag 1: Kan ik feedback krijgen op mijn UI desings?
+- vraag 2: Hoe stel ik de issues op github op?
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Alle knoppen in dezelfde kleur
+- feedback 2: Meer downsizen in kleur, te veel verschillende kleuren
+- feedback 3: Meer witruimte op sommige plaatsen. Duidelijk maken welke zaken bij elkaar horen
+- feedback 4: Extra tabel aanmaken in de database 'opstelling' om de spelers die op het veld staan bij te houden
