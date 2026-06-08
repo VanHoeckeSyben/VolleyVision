@@ -9,8 +9,10 @@ from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
 from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOPatchOpstelling, DTOPatchSpeler
-# from RPi import GPIO
+from RPi import GPIO
 from datetime import date, datetime
+from bluedot.btcomm import BluetoothClient
+from signal import pause
 
 
 # TODO: Add logging
@@ -37,20 +39,76 @@ async_loop = None
 # App setup
 # ----------------------------------------------------
 
+@asynccontextmanager
+# Lifespan Manager (Startup/Shutdown)
+async def lifespan_manager(app: FastAPI):
+    global async_loop
+    # Start background taken (process_queue + all_out) op in de applicatie
+    async_loop = asyncio.get_running_loop()
+
+    # GPIO.setmode(GPIO.BCM)
+    # GPIO.setup(led,GPIO.OUT)
+    # GPIO.setup(knop1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    logger.info("GPIO initialised")
+    threading.Thread(
+    target=gpio_keep_alive,
+    daemon=True               # 🔑 daemon‑threads stoppen automatisch bij app‑exit
+    ).start()
+
+    # Geef controle aan FastAPI/Socket.IO
+    yield
+
+    # TODO: GPIO cleanup and goodbye
+    GPIO.cleanup()
+    logger.info("GPIO cleaned up – bye!")
+
+
 # Create a FastAPI app, add CORS middleware, initialize Socket.IO server + ASGI app, create async queue for messages
-app = FastAPI(title="VolleyVision", debug=True, description="VolleyVision", version="1.0")
+app = FastAPI(title="VolleyVision", debug=True, description="VolleyVision", version="1.0", lifespan=lifespan_manager)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='asgi', logger=True)
 sio_app = socketio.ASGIApp(sio, app)
 
 ENDPOINT = "/api/v1"  # Define the endpoint for the API
 
-
-
 # ----------------------------------------------------
 # Background Tasks
 # ----------------------------------------------------
 
+def gpio_keep_alive():
+    def data_received(data):
+        data = str(data).strip()
+
+        if ":" not in data:
+            return
+
+        sensor, value = data.split(":", 1)
+        
+        print(data)
+        future = asyncio.run_coroutine_threadsafe(
+            sio.emit("B2F_verandering_sensoren", {'sensoren': {"sensornaam": sensor, "value": value}}),
+            async_loop
+        )
+
+        # `run_coroutine_threadsafe` post de coroutine naar de hoofd‑event‑loop
+        # en geeft een *Future* terug waarmee je (optioneel) op fouten kunt wachten.
+        logger.debug("Emit scheduled from GPIO thread – future: %s", future)
+
+    c = None
+
+    try:
+        c = BluetoothClient("ESP32_VolleyVision", data_received)
+        pause()
+        
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Gestopt door keyboard")
+
+    finally:
+        if c:
+            c.disconnect()
 
 # ----------------------------------------------------
 # FastAPI Endpoints
@@ -351,6 +409,12 @@ async def patch_speler(speler_id: int, speler_gegevens: DTOPatchSpeler):
 # ----------------------------------------------------
 # Socket.IO Handlers
 # ----------------------------------------------------
+
+@sio.event
+async def connect(sid, environ):
+    print("A new client connected")
+
+    await sio.emit('B2F_connected', sid)
 
 # ----------------------------------------------------
 # Run the app
