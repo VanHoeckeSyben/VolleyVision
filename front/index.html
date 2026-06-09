@@ -19,28 +19,33 @@
 
 <body class="js-dashboard">
 
-    <header class="c-header o-container">
-        <h1 class="c-header__titel">VolleyVision</h1>
-        <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
-                <path d="M4 5h16" />
-                <path d="M4 12h16" />
-                <path d="M4 19h16" />
-            </svg></button>
-
-        <nav class="c-nav">
-            <ul class="c-nav__list">
-                <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link" href="">Home</a></li>
-                <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link" href="">Match</a></li>
-                <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link" href="">Spelers</a></li>
-                <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link" href="database.html">Stats</a>
-                </li>
-                <li class="c-nav__listitem c-nav__listitem--instellingen"><a class="c-nav__link"
-                        href="">Instellingen</a></li>
-            </ul>
-        </nav>
-
+    <header class="c-header">
+        <div class="c-header__inner">
+            <h1 class="c-header__titel">VolleyVision</h1>
+            <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                    <path d="M4 5h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 19h16" />
+                </svg></button>
+            <nav class="c-nav">
+                <ul class="c-nav__list">
+                    <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink c-nav__actief"
+                            href="index.html" data-navlink="Home">Home</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Spelers">Spelers</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link js-navlink"
+                            href="database.html" data-navlink="Stats">Stats</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--instellingen"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Instellingen">Instellingen</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main class="c-main o-container">
@@ -103,19 +108,19 @@
             </div>
             <aside class="c-systeemstatus">
                 <h4 class="c-systeemstatus__titel">Systeemstatus</h4>
-                <div class="c-systeemstatus__kaarten">
+                <div class="c-systeemstatus__kaarden">
                     <div class="c-status-kaart">
                         <p class="c-status-kaart__naam">ESP32</p>
                         <p class="c-status-kaart__waarde u-status__actief">Verbonden</p>
                     </div>
                     <div class="c-status-kaart">
                         <p class="c-status-kaart__naam">Druksensor</p>
-                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" , data-sensor="Druksensor">0 N
+                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" data-sensor="Druksensor">0 N
                         </p>
                     </div>
                     <div class="c-status-kaart">
                         <p class="c-status-kaart__naam">Lasersensor</p>
-                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" , data-sensor="Lasersensor">
+                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" data-sensor="Lasersensor">
                             vrij</p>
                     </div>
                     <div class="c-status-kaart">

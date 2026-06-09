@@ -250,7 +250,7 @@ const listenToSocketDatabase = () => {
     getSensorEvents();
     getServes();
   });
-}
+};
 
 // #endregion
 
