@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Database Viewer</title>
+    <link rel="stylesheet" href="style/database.css">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script src="script/app.js"></script>
+</head>
+
+<body class="js-database">
+    <h1>Database Viewer</h1>
+    <div class="js-content">
+        <h2>Devices</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>device_id</th>
+                    <th>device_type_id</th>
+                    <th>naam</th>
+                    <th>beschrijving</th>
+                </tr>
+            </thead>
+            <tbody class="js-devices">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Device Types</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>device_type_id</th>
+                    <th>type</th>
+                </tr>
+            </thead>
+            <tbody class="js-device_types">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Matchen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>match_id</th>
+                    <th>match_naam</th>
+                    <th>datum</th>
+                    <th>locatie</th>
+                </tr>
+            </thead>
+            <tbody class="js-matchen">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Match opstellingen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>match_id</th>
+                    <th>naam</th>
+                    <th>voornaam</th>
+                    <th>rugnummer</th>
+                    <th>veld_positie</th>
+                </tr>
+            </thead>
+            <tbody class="js-opstellingen">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Sensorevents</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>event_id</th>
+                    <th>serve_id</th>
+                    <th>device_id</th>
+                    <th>waarde</th>
+                    <th>event_tijd</th>
+                </tr>
+            </thead>
+            <tbody class="js-sensorevents">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Serves</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>serve_id</th>
+                    <th>speler_id</th>
+                    <th>match_id</th>
+                    <th>start_tijd</th>
+                    <th>eind_tijd</th>
+                </tr>
+            </thead>
+            <tbody class="js-serves">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+
+        <h2>Spelers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>speler_id</th>
+                    <th>naam</th>
+                    <th>voornaaam</th>
+                    <th>rugnummer</th>
+                    <th>positie</th>
+                    <th>active</th>
+                </tr>
+            </thead>
+            <tbody class="js-spelers">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Settings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>setting_id</th>
+                    <th>setting_naam</th>
+                    <th>setting_value</th>
+                </tr>
+            </thead>
+            <tbody class="js-settings">
+                <tr>
+                    <td>Waarde 1</td>
+                    <td>Waarde 2</td>
+                    <td>Waarde 3</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
