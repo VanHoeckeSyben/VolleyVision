@@ -134,3 +134,15 @@ Dit is de feedback op mijn vragen.
 - feedback 2: Meer downsizen in kleur, te veel verschillende kleuren
 - feedback 3: Meer witruimte op sommige plaatsen. Duidelijk maken welke zaken bij elkaar horen
 - feedback 4: Extra tabel aanmaken in de database 'opstelling' om de spelers die op het veld staan bij te houden
+
+## Gesprek 8 (Consult) (Datum: 08/06/2026)
+
+Lector: Geert Desloovere
+
+Vragen voor dit gesprek:
+
+- vraag 1: Mijn ESP32 wil niet aangaan. Kan u mij helpen?
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Mijn type ESP kan geen USB-C naar USB-C verbinden aannemen
