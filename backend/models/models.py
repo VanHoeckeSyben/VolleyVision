@@ -40,6 +40,13 @@ class Device(BaseModel):
 class Devices(BaseModel):
     devices: list[Device]
     
+class DeviceType(BaseModel):
+    device_type_id: int
+    type: str
+    
+class DeviceTypes(BaseModel):
+    device_types: list[DeviceType]
+    
 class OpstellingSpeler(BaseModel):
     match_id: int
     naam: str
@@ -89,7 +96,7 @@ class SensorEvent(BaseModel):
     event_id: int
     serve_id: int
     device_id: int
-    waarde: float
+    waarde: str
     event_tijd: datetime
     
 class SensorEvents(BaseModel):

@@ -8,9 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOPatchOpstelling, DTOPatchSpeler
-# from RPi import GPIO
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOPatchOpstelling, DTOPatchSpeler
+from RPi import GPIO
 from datetime import date, datetime
+from bluedot.btcomm import BluetoothClient
 
 
 # TODO: Add logging
@@ -26,31 +27,136 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: Add hardware constants
-LED_PIN    = 21
-BUTTON_PIN = 20
+LED = 6
+KNOP1 = 5
+KNOP2 = 17
 
 # TODO: global variables (like led_state)
-led_state = False  # globale staat bovenaan
+led_state = True  # globale staat bovenaan
 async_loop = None
+serve_actief = False
+teller_serve_id = 1
+device_id = -1
+druk_actief = False
 
 # ----------------------------------------------------
 # App setup
 # ----------------------------------------------------
 
+@asynccontextmanager
+# Lifespan Manager (Startup/Shutdown)
+async def lifespan_manager(app: FastAPI):
+    global async_loop
+    # Start background taken (process_queue + all_out) op in de applicatie
+    async_loop = asyncio.get_running_loop()
+
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LED,GPIO.OUT)
+    GPIO.setup(KNOP1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(KNOP2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    logger.info("GPIO initialised")
+    threading.Thread(
+    target=gpio_keep_alive,
+    daemon=True               # 🔑 daemon‑threads stoppen automatisch bij app‑exit
+    ).start()
+
+    # Geef controle aan FastAPI/Socket.IO
+    yield
+
+    # TODO: GPIO cleanup and goodbye
+    GPIO.cleanup()
+    logger.info("GPIO cleaned up – bye!")
+
+
 # Create a FastAPI app, add CORS middleware, initialize Socket.IO server + ASGI app, create async queue for messages
-app = FastAPI(title="VolleyVision", debug=True, description="VolleyVision", version="1.0")
+app = FastAPI(title="VolleyVision", debug=True, description="VolleyVision", version="1.0", lifespan=lifespan_manager)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 sio = socketio.AsyncServer(cors_allowed_origins='*', async_mode='asgi', logger=True)
 sio_app = socketio.ASGIApp(sio, app)
 
 ENDPOINT = "/api/v1"  # Define the endpoint for the API
 
-
-
 # ----------------------------------------------------
 # Background Tasks
 # ----------------------------------------------------
 
+def gpio_keep_alive():
+    global serve_actief
+    global teller_serve_id
+    def data_received(data):
+        global druk_actief
+        data = str(data).strip()
+
+        regels = data.split("\n")
+    
+        for regel in regels:
+            regel = regel.strip()
+            if ":" not in regel:
+                continue
+            
+            sensor, value = regel.split(":", 1)
+            print(regel)
+
+            asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_sensoren", {"sensornaam": sensor, "value": value}),async_loop)
+        
+            if sensor == "Druksensor": 
+                device_id = 1
+                if value != "0N" and not druk_actief:
+                    druk_actief = True
+                    if serve_actief:
+                        DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
+                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+                elif value == "0N" and serve_actief:
+                    druk_actief = False
+                    if serve_actief:
+                        DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=0, event_tijd=datetime.now())
+                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+                        
+            if sensor == "Lasersensor": 
+                device_id = 2
+                if serve_actief:
+                    DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
+                    asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+            if sensor == "Geluidsensor": 
+                device_id = 3
+                if serve_actief:
+                    DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
+                    asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+
+    c = None
+
+    try:
+        c = BluetoothClient("ESP32_VolleyVision", data_received)
+        
+        while True:
+            status_knop1 = not GPIO.input(KNOP1)
+
+            if status_knop1 and not serve_actief:
+                serve_actief = True
+                GPIO.output(LED, GPIO.LOW)
+                
+                start_tijd = datetime.now()
+
+                teller = 0
+                while teller < 80 and not not GPIO.input(KNOP2):
+                    time.sleep(0.1)
+                    teller += 1
+
+                serve_actief = False
+                eind_tijd = datetime.now()
+                GPIO.output(LED, GPIO.HIGH)
+                
+                teller_serve_id = DataRepository.add_serve(speler_id=1, match_id=1, start_tijd=start_tijd, eind_tijd=eind_tijd)
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+
+            time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        print("Gestopt door keyboard")
+
+    finally:
+        if c:
+            c.disconnect()
 
 # ----------------------------------------------------
 # FastAPI Endpoints
@@ -155,6 +261,20 @@ async def read_alle_devices():
         
     return Devices(devices=list_devices)
 
+@app.get(ENDPOINT + "/devicetypes", response_model=DeviceTypes, summary="Ophalen van alle device types")
+async def read_alle_device_types():
+    data = DataRepository.read_alle_device_types()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device types niet gevonden")
+    
+    list_device_types = []
+    for item in data:
+        device_type = DeviceType(device_type_id=int(item["device_type_id"]), type=item["type"])
+        list_device_types.append(device_type)
+        
+    return DeviceTypes(device_types=list_device_types)
+
 @app.get(ENDPOINT + "/opstelling", response_model=OpstellingSpelers, summary="Ophalen van alle match opstellingen")
 async def read_alle_match_opstellingen():
     data = DataRepository.read_alle_match_opstellingen()
@@ -182,6 +302,20 @@ async def read_match_opstelling(match_id: int):
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
+
+@app.get(ENDPOINT + "/sensorevents", response_model=SensorEvents, summary="Ophalen van alle sensor events")
+async def read_alle_sensor_events():
+    data = DataRepository.read_alle_sensor_events()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sensor events niet gevonden")
+    
+    list_sensor_events = []
+    for item in data:
+        sensor_event = SensorEvent(event_id=int(item["event_id"]), serve_id=int(item["serve_id"]), device_id=int(item["device_id"]), waarde=item["waarde"], event_tijd=item["event_tijd"])
+        list_sensor_events.append(sensor_event)
+        
+    return SensorEvents(sensorevents=list_sensor_events)
 
 @app.get(ENDPOINT + "/instellingen", response_model=Instellingen, summary="Ophalen van alle instellingen")
 async def read_alle_instellingen():
@@ -351,6 +485,12 @@ async def patch_speler(speler_id: int, speler_gegevens: DTOPatchSpeler):
 # ----------------------------------------------------
 # Socket.IO Handlers
 # ----------------------------------------------------
+
+@sio.event
+async def connect(sid, environ):
+    print("A new client connected")
+
+    await sio.emit('B2F_connected', sid)
 
 # ----------------------------------------------------
 # Run the app

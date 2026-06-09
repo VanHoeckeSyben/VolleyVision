@@ -46,6 +46,11 @@ class DataRepository:
         return Database.get_rows(sql)
     
     @staticmethod
+    def read_alle_device_types():
+        sql = "SELECT * FROM DeviceTypes"
+        return Database.get_rows(sql)
+    
+    @staticmethod
     def read_alle_match_opstellingen():
         sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id"
         return Database.get_rows(sql)
@@ -55,6 +60,11 @@ class DataRepository:
         sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
         params = [match_id]
         return Database.get_rows(sql, params)
+    
+    @staticmethod
+    def read_alle_sensor_events():
+        sql = "SELECT * FROM SensorEvents"
+        return Database.get_rows(sql)
     
     @staticmethod
     def read_alle_instellingen():
@@ -93,19 +103,19 @@ class DataRepository:
     
     @staticmethod
     def add_sensorevent(serve_id, device_id, waarde, event_tijd):
-        sql = "INSERT INTO Sensorevents (serve_id, device_id, waarde, event_tijd) VALUES (%s, %s, %s, %s)"
+        sql = "INSERT INTO SensorEvents (serve_id, device_id, waarde, event_tijd) VALUES (%s, %s, %s, %s)"
         params = [serve_id, device_id, waarde, event_tijd]
         return Database.execute_sql(sql, params)
     
     @staticmethod
     def read_sensorevent_by_id(event_id):
-        sql = "SELECT * FROM Sensorevents WHERE event_id = %s"
+        sql = "SELECT * FROM SensorEvents WHERE event_id = %s"
         params = [event_id]
         return Database.get_one_row(sql, params)
     
     @staticmethod
     def read_alle_sensorevents():
-        sql = "SELECT * FROM Sensorevents"
+        sql = "SELECT * FROM SensorEvents"
         return Database.get_rows(sql)
     
     @staticmethod
