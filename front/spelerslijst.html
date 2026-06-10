@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyVision</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script src="script/spelerslijst.js"></script>
+</head>
+
+<body class="js-spelerslijst">
+    <header class="c-header">
+        <div class="c-header__inner">
+            <h1 class="c-header__titel">VolleyVision</h1>
+            <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                    <path d="M4 5h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 19h16" />
+                </svg></button>
+            <nav class="c-nav">
+                <ul class="c-nav__list">
+                    <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
+                            href="index.html" data-navlink="Home">Home</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink c-nav__actief"
+                            href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link js-navlink"
+                            href="database.html" data-navlink="Stats">Stats</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--instellingen"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Instellingen">Instellingen</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="c-main o-container">
+
+        <section class="c-spelersinfo">
+            <div class="c-spelersinfo__lore">
+                <h2 class="c-spelersinfo__titel">Spelerslijst</h2>
+                <p class="c-spelersinfo__ondertitel">Beheer alle spelers</p>
+            </div>
+            <button class="c-spelerinfo__button js-addspeler"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus">
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                </svg>Speler toevoegen</button>
+
+            <div class="c-modal js-modal">
+                <div class="c-modal__overlay"></div>
+                <div class="c-modal__venster c-modal__overlay">
+
+                    <div class="c-modal__header">
+                        <h2 class="c-modal__titel">Speler toevoegen</h2>
+                        <button class="c-modal__sluit js-modal-sluit">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form class="c-modal__form">
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="rugnummer">Rugnummer</label>
+                            <input class="c-veld__input" type="number" id="rugnummer" name="rugnummer"
+                                placeholder="bv. 10" min="1" max="99">
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="voornaam">Voornaam</label>
+                            <input class="c-veld__input" type="text" id="voornaam" name="voornaam"
+                                placeholder="bv. Syben">
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="naam">Naam</label>
+                            <input class="c-veld__input" type="text" id="naam" name="naam" placeholder="bv. Van Hoecke">
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="positie">Positie</label>
+                            <select class="c-veld__input" id="positie" name="positie">
+                                <option value="" disabled selected>Kies een positie</option>
+                                <option value="setter">Setter</option>
+                                <option value="outside-hitter">Outside Hitter</option>
+                                <option value="opposite">Opposite</option>
+                                <option value="middle-blocker">Midden</option>
+                                <option value="libero">Libero</option>
+                            </select>
+                        </div>
+                    </form>
+
+                    <div class="c-modal__acties">
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--annuleren js-modal-sluit">Annuleren</button>
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--toevoegen js-modal-toevoegen">Toevoegen</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <div class="c-table">
+            <table>
+                <colgroup>
+                    <col style="width: 15%">
+                    <col style="width: 25%">
+                    <col style="width: 30%">
+                    <col style="width: 20%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>RugNr</th>
+                        <th>Voornaam</th>
+                        <th>Naam</th>
+                        <th>Positie</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody class="js-devices">
+                    <tr>
+                        <td>13</td>
+                        <td class="c-table__voornaam">Lore</td>
+                        <td class="c-table__naam">Van den Brempt</td>
+                        <td>Midden</td>
+                        <td class="c-table__buttons"><button class="c-table__edit c-table__button"
+                                data-speler_id="1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="lucide lucide-pencil-icon lucide-pencil">
+                                    <path
+                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                    <path d="m15 5 4 4" />
+                                </svg></button><button class="c-table__delete c-table__button" data-speler_id="1"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                    <path d="M18 6 6 18" />
+                                    <path d="m6 6 12 12" />
+                                </svg></button></td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td class="c-table__voornaam">Christophe</td>
+                        <td class="c-table__naam">Laprudence</td>
+                        <td>Setter</td>
+                        <td class="c-table__buttons"><button class="c-table__edit c-table__button"
+                                data-speler_id="2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="lucide lucide-pencil-icon lucide-pencil">
+                                    <path
+                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                                    <path d="m15 5 4 4" />
+                                </svg></button><button class="c-table__delete c-table__button" data-speler_id="2"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                    <path d="M18 6 6 18" />
+                                    <path d="m6 6 12 12" />
+                                </svg></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
