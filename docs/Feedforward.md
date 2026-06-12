@@ -146,3 +146,30 @@ Vragen voor dit gesprek:
 Dit is de feedback op mijn vragen.
 
 - feedback 1: Mijn type ESP kan geen USB-C naar USB-C verbinden aannemen
+
+## Gesprek 9 (Toermoment) (Datum: 09/06/2026)
+
+Lector: Geert Desloovere, Stijn Walcarius, 
+
+Vragen voor dit gesprek:
+
+- vraag 1: /
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Geen feedback, alles oke
+
+## Gesprek 10 (Consult) (Datum: 11/06/2026)
+
+Lector: Claudia Eeckhout
+
+Vragen voor dit gesprek:
+
+- vraag 1: Kan ik feedback krijgen op mijn website UI
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Red routes duidelijker maken (Nieuwe match groter dan instellingen bijvoorbeeld)
+- Knoppen allemaal geel maken ipv verschillende kleuren
+- Max aantal spelers instellen
+- Systeemstatus uit dashboard en naar instellingen verplaatsen
