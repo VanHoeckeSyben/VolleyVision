@@ -170,6 +170,6 @@ Vragen voor dit gesprek:
 Dit is de feedback op mijn vragen.
 
 - feedback 1: Red routes duidelijker maken (Nieuwe match groter dan instellingen bijvoorbeeld)
-- Knoppen allemaal geel maken ipv verschillende kleuren
-- Max aantal spelers instellen
-- Systeemstatus uit dashboard en naar instellingen verplaatsen
+- feedback 2: Knoppen allemaal geel maken ipv verschillende kleuren
+- feedback 3: Max aantal spelers instellen
+- feedback 4: Systeemstatus uit dashboard en naar instellingen verplaatsen
