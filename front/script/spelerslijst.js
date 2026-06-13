@@ -1,7 +1,7 @@
 'use strict';
 
 const lanIP = `${window.location.hostname}:8000`;
-const API = `http://127.0.0.1:8000/api/v1`
+const API = `http://${lanIP}/api/v1`
 const socketio = io(lanIP);
 
 // #region ***  DOM references                           ***********
@@ -313,7 +313,7 @@ const listenToSocket = () => {
 
 // #region ***  Init / DOMContentLoaded                  ***********
 const init = () => {
-    console.info('DOM geladen');
+    console.info('Spelerslijst pagina geladen');
     htmlModal = document.querySelector('.js-modal');
     htmlSpelerRow = document.querySelector('.js-spelerrow');
     htmlRugnummerError = document.querySelector('.js-rugnummererror');

@@ -3,9 +3,9 @@ from datetime import date, datetime
 
 class Match(BaseModel):
     match_id: int
-    match_naam: str
     datum: date
     locatie: str
+    opslag_wij: int
     
 class Matchen(BaseModel):
     matchen: list[Match]
@@ -66,8 +66,8 @@ class Instellingen(BaseModel):
     instellingen: list[Instelling]
     
 class DTOMatch(BaseModel):
-    match_naam: str | None
     locatie: str
+    opslag_wij: int
     
 class DTOSpeler(BaseModel):
     naam: str
