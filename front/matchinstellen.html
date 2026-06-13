@@ -47,6 +47,77 @@
         </div>
     </header>
 
+    <main class="c-main o-container">
+        <section class="c-welkom">
+            <h2 class="c-welkom__titel">Nieuwe Match</h2>
+            <p class="c-welkom__ondertitel">Stel de spelers opstelling op</p>
+        </section>
+
+        <div class="c-matchinstellingen">
+            <div class="c-volleybalveld">
+                <div class="c-volleybalveld__positie1 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="1" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>1</option>
+                    </select>
+                </div>
+                <div class="c-volleybalveld__positie2 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="2" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>2</option>
+                    </select>
+                </div>
+                <div class="c-volleybalveld__positie3 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="3" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>3</option>
+                    </select>
+                </div>
+                <div class="c-volleybalveld__positie4 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="4" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>4</option>
+                    </select>
+                </div>
+                <div class="c-volleybalveld__positie5 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="5" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>5</option>
+                    </select>
+                </div>
+                <div class="c-volleybalveld__positie6 c-volleybalveld__positie">
+                    <label class="c-volleybajlveld__label" for="veldpositie"></label>
+                    <select class="c-volleybalveld__input js-veldpositie" data-positie="6" id="veldpositie"
+                        name="veldpositie">
+                        <option value="" disabled selected>6</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="c-opties">
+                <div class="c-opslag">
+                    <p class="c-opslag__titel">Opslag: <span
+                            class="c-opslag__waarde js-ploeg-opslag">Tegenstander</span></p>
+                    <label class="c-switch">
+                        <input class="js-opslag-toggle" type="checkbox">
+                        <span class="c-slider c-round"></span>
+                    </label>
+                </div>
+                <button class="c-startmatch"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="lucide lucide-play-icon lucide-play">
+                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                    </svg>Live Match Starten</button>
+            </div>
+        </div>
+
+    </main>
+
 </body>
 
 </html>

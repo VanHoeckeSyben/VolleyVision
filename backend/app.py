@@ -174,7 +174,7 @@ async def read_alle_matchen():
 
     list_matchen = []
     for item in data:
-        match = Match(match_id=int(item["match_id"]), match_naam=item["match_naam"], datum=item["datum"], locatie=item["locatie"])
+        match = Match(match_id=int(item["match_id"]), datum=item["datum"], locatie=item["locatie"], opslag_wij=int(item["opslag_wij"]))
         list_matchen.append(match)
 
     return Matchen(matchen=list_matchen)
@@ -186,7 +186,7 @@ async def read_match_by_id(match_id: int):
     if not data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match niet gevonden")
 
-    return Match(match_id=int(data["match_id"]), match_naam=data["match_naam"], datum=data["datum"], locatie=data["locatie"])
+    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]))
 
 @app.get(ENDPOINT + "/serves", response_model=Serves, summary="Ophalen van alle serves")
 async def read_alle_serves():
@@ -345,7 +345,7 @@ async def read_instelling(instelling_id: int):
 
 @app.post(ENDPOINT + "/matchen", response_model=Match, summary="Match toevoegen")
 async def add_match(match_gegevens: DTOMatch):
-    response_id = DataRepository.add_match(match_gegevens.match_naam, datetime.now().date(), match_gegevens.locatie)
+    response_id = DataRepository.add_match(datetime.now().date(), match_gegevens.locatie, match_gegevens.opslag_wij)
     
     if not response_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
@@ -355,7 +355,7 @@ async def add_match(match_gegevens: DTOMatch):
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
             
-    return Match(match_id=int(data["match_id"]), match_naam=data["match_naam"], datum=data["datum"], locatie=data["locatie"])
+    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]))
 
 @app.post(ENDPOINT + "/spelers", response_model=Speler, summary="Speler toevoegen")
 async def add_speler(speler_gegevens: DTOSpeler):

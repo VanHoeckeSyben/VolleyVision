@@ -78,9 +78,9 @@ class DataRepository:
         return Database.get_one_row(sql, params)
     
     @staticmethod
-    def add_match(match_naam, datum, locatie):
-        sql = "INSERT INTO Matchen (match_naam, datum, locatie) VALUES (%s, %s, %s)"
-        params = [match_naam, datum, locatie]
+    def add_match(datum, locatie, opslag_wij):
+        sql = "INSERT INTO Matchen (datum, locatie, opslag_wij) VALUES (%s, %s, %s)"
+        params = [datum, locatie, opslag_wij]
         return Database.execute_sql(sql, params)
     
     @staticmethod
