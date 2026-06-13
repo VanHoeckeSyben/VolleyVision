@@ -141,3 +141,14 @@ class DataRepository:
         sql = "UPDATE Spelers SET active = %s WHERE speler_id = %s"
         params = [actief, speler_id]
         return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def count_active_spelers():
+        sql = "SELECT COUNT(*) as count FROM Spelers WHERE active = 1"
+        return Database.get_one_row(sql)
+    
+    @staticmethod
+    def search_player_with_name(voornaam, naam):
+        sql = "SELECT * FROM Spelers WHERE voornaam = %s AND naam = %s"
+        params = [voornaam, naam]
+        return Database.get_one_row(sql, params)

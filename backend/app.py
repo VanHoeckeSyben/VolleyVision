@@ -14,7 +14,7 @@ from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
 
 
-# TODO: Add logging
+# logging
 import logging
 logging.basicConfig(
     level=logging.INFO,                    # alles ≥ INFO‑niveau tonen
@@ -26,18 +26,19 @@ logger = logging.getLogger(__name__)
 
 
 
-# TODO: Add hardware constants
+# constants
 LED = 6
 KNOP1 = 5
 KNOP2 = 17
 
-# TODO: global variables (like led_state)
+# global variables
 led_state = True  # globale staat bovenaan
 async_loop = None
 serve_actief = False
 teller_serve_id = 1
 device_id = -1
 druk_actief = False
+max_spelers = 12
 
 # ----------------------------------------------------
 # App setup
@@ -358,7 +359,26 @@ async def add_match(match_gegevens: DTOMatch):
 
 @app.post(ENDPOINT + "/spelers", response_model=Speler, summary="Speler toevoegen")
 async def add_speler(speler_gegevens: DTOSpeler):
-    response_id = DataRepository.add_speler(speler_gegevens.naam, speler_gegevens.voornaam, speler_gegevens.rugnummer, speler_gegevens.positie)
+    if (speler_gegevens.naam == "" or speler_gegevens.voornaam == "" or speler_gegevens.positie == ""):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Gegevens mogen niet leeg zijn")
+    
+    if (any(char.isdigit() for char in speler_gegevens.naam) or any(char.isdigit() for char in speler_gegevens.voornaam)):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Gegevens moeten geldig zijn (Geen cijfers in namen)")
+    
+    active_spelers = DataRepository.count_active_spelers()
+    
+    if (active_spelers["count"] >= max_spelers):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Maximum aantal spelers in een team bereikt (12)")
+    
+    check_speler = DataRepository.search_player_with_name(speler_gegevens.voornaam, speler_gegevens.naam)
+    print(check_speler)
+    
+    if check_speler:
+    
+        if (check_speler["active"] == 0):
+            response_id = DataRepository.patch_speler(actief=1, speler_id=check_speler["speler_id"])
+    else:
+        response_id = DataRepository.add_speler(speler_gegevens.naam, speler_gegevens.voornaam, speler_gegevens.rugnummer, speler_gegevens.positie)
     
     if not response_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
@@ -367,6 +387,8 @@ async def add_speler(speler_gegevens: DTOSpeler):
     
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+        
+    await sio.emit('B2F_nieuwe_speler', {})
             
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
@@ -430,6 +452,8 @@ async def update_speler(speler_id: int, speler_gegevens: DTOSpeler):
 
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+        
+    await sio.emit('B2F_update_speler', {})
 
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
@@ -479,6 +503,8 @@ async def patch_speler(speler_id: int, speler_gegevens: DTOPatchSpeler):
 
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Speler niet gevonden")
+        
+    await sio.emit('B2F_delete_speler', {})
 
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
     

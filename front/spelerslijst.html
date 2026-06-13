@@ -51,9 +51,10 @@
 
         <section class="c-spelersinfo">
             <div class="c-spelersinfo__lore">
-                <h2 class="c-spelersinfo__titel">Spelerslijst</h2>
+                <h2 class="c-spelersinfo__titel">Spelerslijst </h2>
                 <p class="c-spelersinfo__ondertitel">Beheer alle spelers</p>
             </div>
+            <h3 class="c-delete_info js-delete_info"></h3>
             <button class="c-spelerinfo__button js-addspeler"><svg xmlns="http://www.w3.org/2000/svg" width="24"
                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus">
@@ -67,6 +68,7 @@
 
                     <div class="c-modal__header">
                         <h2 class="c-modal__titel">Speler toevoegen</h2>
+                        <br>
                         <button class="c-modal__sluit js-modal-sluit">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -77,30 +79,37 @@
                         </button>
                     </div>
 
-                    <form class="c-modal__form">
+                    <p class="c-modal__info_error js-modal__info_error"></p>
+
+                    <form class="c-modal__form js-modal-form">
                         <div class="c-veld">
-                            <label class="c-veld__label" for="rugnummer">Rugnummer</label>
-                            <input class="c-veld__input" type="number" id="rugnummer" name="rugnummer"
-                                placeholder="bv. 10" min="1" max="99">
+                            <label class="c-veld__label" for="rugnummer">Rugnummer <span
+                                    class="c-veld__errormsg js-rugnummererror">*</span></label>
+                            <input class="c-veld__input js-rugnummer" type="number" id="rugnummer" name="rugnummer"
+                                placeholder="bv. 10" min="1" max="99" required>
                         </div>
                         <div class="c-veld">
-                            <label class="c-veld__label" for="voornaam">Voornaam</label>
-                            <input class="c-veld__input" type="text" id="voornaam" name="voornaam"
-                                placeholder="bv. Syben">
+                            <label class="c-veld__label" for="voornaam">Voornaam <span
+                                    class="c-veld__errormsg js-voornaamerror">*</span></label>
+                            <input class="c-veld__input js-voornaam" type="text" id="voornaam" name="voornaam"
+                                placeholder="bv. Syben" required>
                         </div>
                         <div class="c-veld">
-                            <label class="c-veld__label" for="naam">Naam</label>
-                            <input class="c-veld__input" type="text" id="naam" name="naam" placeholder="bv. Van Hoecke">
+                            <label class="c-veld__label" for="naam">Naam <span
+                                    class="c-veld__errormsg js-naamerror">*</span></label>
+                            <input class="c-veld__input js-naam" type="text" id="naam" name="naam"
+                                placeholder="bv. Van Hoecke" required>
                         </div>
                         <div class="c-veld">
-                            <label class="c-veld__label" for="positie">Positie</label>
-                            <select class="c-veld__input" id="positie" name="positie">
+                            <label class="c-veld__label" for="positie">Positie <span
+                                    class="c-veld__errormsg js-positieerror">*</span></label>
+                            <select class="c-veld__input js-positie" id="positie" name="positie">
                                 <option value="" disabled selected>Kies een positie</option>
-                                <option value="setter">Setter</option>
-                                <option value="outside-hitter">Outside Hitter</option>
-                                <option value="opposite">Opposite</option>
-                                <option value="middle-blocker">Midden</option>
-                                <option value="libero">Libero</option>
+                                <option value="Setter">Setter</option>
+                                <option value="Outside Hitter">Outside Hitter</option>
+                                <option value="Opposite">Opposite</option>
+                                <option value="Midden">Midden</option>
+                                <option value="Libero">Libero</option>
                             </select>
                         </div>
                     </form>
@@ -109,7 +118,101 @@
                         <button
                             class="c-modal__acties--knop c-modal__acties--annuleren js-modal-sluit">Annuleren</button>
                         <button
-                            class="c-modal__acties--knop c-modal__acties--toevoegen js-modal-toevoegen">Toevoegen</button>
+                            class="c-modal__acties--knop c-modal__acties--toevoegen u-active js-modal-toevoegen">Toevoegen</button>
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--aanpassen js-modal-aanpassen">Aanpassen</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="c-modal js-modal-verwijderen">
+                <div class="c-modal__overlay"></div>
+                <div class="c-modal__venster c-modal__overlay">
+                    <div class="c-modal__header">
+                        <h2 class="c-modal__titel">Speler verwijderen</h2>
+                        <br>
+                        <button class="c-modal__sluit js-modal-verwijderen-sluit">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-x">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="c-modal__info_error js-modal-verwijderen-info">
+                        Ben je zeker dat je <strong class="js-modal-verwijderen-naam"></strong> wil verwijderen?
+                        Deze actie kan niet ongedaan worden gemaakt.
+                    </p>
+                    <div class="c-modal__acties">
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--annuleren js-modal-verwijderen-sluit">Annuleren</button>
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--verwijderen u-active js-modal-verwijderen-bevestig">Verwijderen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-modal js-modal">
+                <div class="c-modal__overlay"></div>
+                <div class="c-modal__venster c-modal__overlay">
+
+                    <div class="c-modal__header">
+                        <h2 class="c-modal__titel">Speler toevoegen</h2>
+                        <br>
+                        <button class="c-modal__sluit js-modal-sluit">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <p class="c-modal__info_error js-modal__info_error"></p>
+
+                    <form class="c-modal__form js-modal-form">
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="rugnummer">Rugnummer <span
+                                    class="c-veld__errormsg js-rugnummererror">*</span></label>
+                            <input class="c-veld__input js-rugnummer" type="number" id="rugnummer" name="rugnummer"
+                                placeholder="bv. 10" min="1" max="99" required>
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="voornaam">Voornaam <span
+                                    class="c-veld__errormsg js-voornaamerror">*</span></label>
+                            <input class="c-veld__input js-voornaam" type="text" id="voornaam" name="voornaam"
+                                placeholder="bv. Syben" required>
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="naam">Naam <span
+                                    class="c-veld__errormsg js-naamerror">*</span></label>
+                            <input class="c-veld__input js-naam" type="text" id="naam" name="naam"
+                                placeholder="bv. Van Hoecke" required>
+                        </div>
+                        <div class="c-veld">
+                            <label class="c-veld__label" for="positie">Positie <span
+                                    class="c-veld__errormsg js-positieerror">*</span></label>
+                            <select class="c-veld__input js-positie" id="positie" name="positie">
+                                <option value="" disabled selected>Kies een positie</option>
+                                <option value="Setter">Setter</option>
+                                <option value="Outside Hitter">Outside Hitter</option>
+                                <option value="Opposite">Opposite</option>
+                                <option value="Midden">Midden</option>
+                                <option value="Libero">Libero</option>
+                            </select>
+                        </div>
+                    </form>
+
+                    <div class="c-modal__acties">
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--annuleren js-modal-sluit">Annuleren</button>
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--toevoegen u-active js-modal-toevoegen">Toevoegen</button>
+                        <button
+                            class="c-modal__acties--knop c-modal__acties--aanpassen js-modal-aanpassen">Aanpassen</button>
                     </div>
 
                 </div>
@@ -131,52 +234,10 @@
                         <th>Voornaam</th>
                         <th>Naam</th>
                         <th>Positie</th>
-                        <th>Acties</th>
+                        <th></th>
                     </tr>
                 </thead>
-                <tbody class="js-devices">
-                    <tr>
-                        <td>13</td>
-                        <td class="c-table__voornaam">Lore</td>
-                        <td class="c-table__naam">Van den Brempt</td>
-                        <td>Midden</td>
-                        <td class="c-table__buttons"><button class="c-table__edit c-table__button"
-                                data-speler_id="1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round"
-                                    class="lucide lucide-pencil-icon lucide-pencil">
-                                    <path
-                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-                                    <path d="m15 5 4 4" />
-                                </svg></button><button class="c-table__delete c-table__button" data-speler_id="1"><svg
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
-                                    <path d="M18 6 6 18" />
-                                    <path d="m6 6 12 12" />
-                                </svg></button></td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td class="c-table__voornaam">Christophe</td>
-                        <td class="c-table__naam">Laprudence</td>
-                        <td>Setter</td>
-                        <td class="c-table__buttons"><button class="c-table__edit c-table__button"
-                                data-speler_id="2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round"
-                                    class="lucide lucide-pencil-icon lucide-pencil">
-                                    <path
-                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-                                    <path d="m15 5 4 4" />
-                                </svg></button><button class="c-table__delete c-table__button" data-speler_id="2"><svg
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
-                                    <path d="M18 6 6 18" />
-                                    <path d="m6 6 12 12" />
-                                </svg></button></td>
-                    </tr>
+                <tbody class="js-spelerrow">
                 </tbody>
             </table>
         </div>
