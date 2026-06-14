@@ -509,6 +509,7 @@ const init = async () => {
     listenToWisselModal();
     listenToStopButton();
 };
-// #endregion
 
 document.addEventListener('DOMContentLoaded', init);
+
+// #endregion
