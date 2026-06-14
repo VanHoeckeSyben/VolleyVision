@@ -6,7 +6,7 @@ const socketio = io(lanIP);
 
 // #region ***  DOM references                           ***********
 let htmlVeldPositie, htmlStartMatch, htmlOpslagToggle, htmlPloegOpslag;
-let opslag_wij;
+let opslag_wij = 0;
 // #endregion
 
 // #region ***  Callback-Visualisation - show___         ***********

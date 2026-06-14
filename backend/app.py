@@ -285,7 +285,7 @@ async def read_alle_match_opstellingen():
     
     list_opstellingen = []
     for item in data:
-        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), speler_id=int(item["speler_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
@@ -299,7 +299,7 @@ async def read_match_opstelling(match_id: int):
     
     list_opstellingen = []
     for item in data:
-        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), speler_id=item["speler_id"], naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
@@ -340,6 +340,21 @@ async def read_instelling(instelling_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instelling niet gevonden")
 
     return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
+
+@app.get(ENDPOINT + "/serves/matchen/{match_id}", response_model=Serves, summary="Ophalen van alle serves van een specifieke match")
+async def read_serves_by_match_id(match_id: int):
+    data = DataRepository.read_serves_by_match_id(match_id)
+
+    if not data:
+        return Serves(serves=[])
+
+    list_serves = []
+
+    for item in data:
+        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"])
+        list_serves.append(serve)
+
+    return Serves(serves=list_serves)
 
 # Toevoegen
 
@@ -406,7 +421,7 @@ async def add_opstelling(opstelling_gegevens: DTOOpstelling):
     
     list_opstellingen = []
     for item in data:
-        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), speler_id=int(item["speler_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)
@@ -487,7 +502,7 @@ async def patch_opstelling(match_id: int, speler_id: int, opstelling_gegevens: D
     
     list_opstellingen = []
     for item in data:
-        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
+        opstelling = OpstellingSpeler(match_id=int(item["match_id"]), speler_id=int(item["speler_id"]), naam=item["naam"], voornaam=item["voornaam"], rugnummer=int(item["rugnummer"]), veld_positie=int(item["veld_positie"]))
         list_opstellingen.append(opstelling)
         
     return OpstellingSpelers(Speler_opstellingen=list_opstellingen)

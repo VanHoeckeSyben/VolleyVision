@@ -52,12 +52,12 @@ class DataRepository:
     
     @staticmethod
     def read_alle_match_opstellingen():
-        sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id"
+        sql = "SELECT o.match_id, s.speler_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id"
         return Database.get_rows(sql)
     
     @staticmethod
     def read_opstelling_by_match_id(match_id):
-        sql = "SELECT o.match_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
+        sql = "SELECT o.match_id, s.speler_id, s.naam, s.voornaam, s.rugnummer, o.veld_positie FROM Opstellingen o INNER JOIN Spelers s ON o.speler_id = s.speler_id WHERE o.match_id = %s"
         params = [match_id]
         return Database.get_rows(sql, params)
     
@@ -152,3 +152,9 @@ class DataRepository:
         sql = "SELECT * FROM Spelers WHERE voornaam = %s AND naam = %s"
         params = [voornaam, naam]
         return Database.get_one_row(sql, params)
+    
+    @staticmethod
+    def read_serves_by_match_id(match_id):
+        sql = "SELECT s.serve_id, s.speler_id, s.match_id, s.start_tijd, s.eind_tijd, sp.voornaam, sp.naam, sp.rugnummer FROM Serves s JOIN Spelers sp ON s.speler_id = sp.speler_id WHERE s.match_id = %s ORDER BY s.start_tijd DESC"
+        params = [match_id]
+        return Database.get_rows(sql, params)
