@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyVision</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script src="script/matchdetails.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body class="js-statistieken">
+
+    <header class="c-header">
+        <div class="c-header__inner">
+            <h1 class="c-header__titel">VolleyVision</h1>
+            <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                    <path d="M4 5h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 19h16" />
+                </svg></button>
+            <nav class="c-nav">
+                <ul class="c-nav__list">
+                    <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
+                            href="index.html" data-navlink="Home">Home</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink"
+                            href="matchinstellen.html" data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink"
+                            href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link js-navlink c-nav__actief"
+                            href="statistieken.html" data-navlink="Stats">Stats</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--instellingen"><a class="c-nav__link js-navlink"
+                            href="instellingen.html" data-navlink="Instellingen">Instellingen</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="c-main o-container">
+        <section class="c-welkom c-matchdetail-header">
+            <h2 class="c-welkom__titel js-matchtitel">Match Detail</h2>
+            <p class="c-welkom__ondertitel js-matchinfo">Laden...</p>
+        </section>
+
+        <section class="c-matchdetail">
+            <section class="c-statgrid">
+                <article class="c-statkaart">
+                    <span class="c-statkaart__waarde js-detail-serves">0</span>
+                    <span class="c-statkaart__label">Serves</span>
+                </article>
+
+                <article class="c-statkaart">
+                    <span class="c-statkaart__waarde js-detail-fouten">0</span>
+                    <span class="c-statkaart__label">Voetfouten</span>
+                </article>
+
+                <article class="c-statkaart">
+                    <span class="c-statkaart__waarde js-detail-percentage">0%</span>
+                    <span class="c-statkaart__label">Foutpercentage</span>
+                </article>
+            </section>
+
+            <section class="c-detailgrid">
+                <article class="c-detailkaart">
+                    <h3 class="c-detailkaart__titel">Serves per speler</h3>
+                    <div class="js-serves-per-speler"></div>
+                </article>
+
+                <article class="c-detailkaart">
+                    <h3 class="c-detailkaart__titel">Voetfouten per speler</h3>
+                    <div class="js-fouten-per-speler"></div>
+                </article>
+            </section>
+
+            <section>
+                <h3 class="c-detailkaart__titel">Alle serves</h3>
+
+                <div class="c-table c-detail-table">
+                    <table>
+                        <colgroup>
+                            <col style="width: 20%">
+                            <col style="width: 30%">
+                            <col style="width: 25%">
+                            <col style="width: 30%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Speler</th>
+                                <th>Duur</th>
+                                <th>Fout</th>
+                                <th>Tijdstip</th>
+                            </tr>
+                        </thead>
+                        <tbody class="js-detail-serves-table"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+</body>
+
+</html>
