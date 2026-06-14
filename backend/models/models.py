@@ -49,6 +49,7 @@ class DeviceTypes(BaseModel):
     
 class OpstellingSpeler(BaseModel):
     match_id: int
+    speler_id: int
     naam: str
     voornaam: str
     rugnummer: int

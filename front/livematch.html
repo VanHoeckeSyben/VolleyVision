@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyVision</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script src="script/livematch.js"></script>
+</head>
+
+<body class="js-livematch">
+    <header class="c-header">
+        <div class="c-header__inner">
+            <h1 class="c-header__titel">VolleyVision</h1>
+            <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                    <path d="M4 5h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 19h16" />
+                </svg></button>
+            <nav class="c-nav">
+                <ul class="c-nav__list">
+                    <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
+                            href="index.html" data-navlink="Home">Home</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink c-nav__actief"
+                            href="matchinstellen.html" data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink"
+                            href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link js-navlink"
+                            href="database.html" data-navlink="Stats">Stats</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--instellingen"><a class="c-nav__link js-navlink" href=""
+                            data-navlink="Instellingen">Instellingen</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="c-main o-container">
+        <section class="c-welkom c-livematch">
+            <div>
+                <h2 class="c-welkom__titel">Live Match</h2>
+                <p class="c-welkom__ondertitel">Beheer hier de live match</p>
+            </div>
+            <button class="c-stopmatch js-stopmatch"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-square-icon lucide-square">
+                    <rect width="18" height="18" x="3" y="3" rx="2" />
+                </svg> Stop Match</button>
+        </section>
+
+        <section class="c-live">
+            <article class="c-livekaart c-livekaart--server">
+                <div class="c-server">
+                    <button class="c-server__btn js-vorige-server">Vorige</button>
+
+                    <div class="c-server__item">
+                        <span class="c-server__label">Vorige server</span>
+                        <strong class="c-server__nummer js-vorige-server-nummer">#21</strong>
+                        <span class="c-server__naam js-vorige-server-naam">Jef</span>
+                    </div>
+
+                    <div class="c-server__item c-server__item--actief">
+                        <span class="c-server__label">Huidige server</span>
+                        <strong class="c-server__nummer js-huidige-server-nummer">#4</strong>
+                        <span class="c-server__naam js-huidige-server-naam">Jonas</span>
+                    </div>
+
+                    <div class="c-server__item">
+                        <span class="c-server__label">Volgende server</span>
+                        <strong class="c-server__nummer js-volgende-server-nummer">#9</strong>
+                        <span class="c-server__naam js-volgende-server-naam">Milan</span>
+                    </div>
+
+                    <button class="c-server__btn js-volgende-server">Volgende</button>
+                </div>
+
+                <button class="c-button c-button--secondary js-open-wissel">Speler wisselen</button>
+            </article>
+
+            <article class="c-livekaart">
+                <h3 class="c-livekaart__titel">Serve Time</h3>
+
+                <div class="c-servetime">
+                    <span class="c-servetime__tijd js-serve-tijd">04.6s</span>
+                    <span class="c-servetime__max">max. 8 seconden</span>
+                    <div class="c-progress">
+                        <div class="c-progress__bar js-serve-progress"></div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="c-livekaart c-livekaart--status">
+                <h3 class="c-livekaart__titel">Voetfout status</h3>
+                <p class="c-status js-voetfout-status">Geen</p>
+                <p class="c-status__detail js-serve-status">Serve geldig</p>
+            </article>
+
+            <button class="c-startserve js-start-serve">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-play-icon lucide-play">
+                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+                </svg>
+                Start Serve
+            </button>
+
+            <section class="c-log">
+                <h3 class="c-log__titel">Serve Log</h3>
+
+                <div class="c-log__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Speler</th>
+                                <th>Duur</th>
+                                <th>Voetfout</th>
+                                <th>Tijd</th>
+                            </tr>
+                        </thead>
+                        <tbody class="js-servelog">
+                            <tr>
+                                <td>1</td>
+                                <td>Jef P.</td>
+                                <td>03.2s</td>
+                                <td>Geen</td>
+                                <td>14:12:05</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Jonas</td>
+                                <td>09.2s</td>
+                                <td>Te lang</td>
+                                <td>14:15:19</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <div class="c-modal js-wissel-modal">
+            <div class="c-modal__overlay js-close-wissel"></div>
+
+            <div class="c-modal__content">
+                <button class="c-modal__close js-close-wissel"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg></button>
+                <h3 class="c-modal__titel">Speler wisselen</h3>
+
+                <div class="c-wissel">
+                    <div>
+                        <h4 class="c-wissel__titel">Op het veld</h4>
+                        <div class="c-wissel__lijst js-spelers-veld">
+                            <button class="c-wissel__speler">#4 Jonas</button>
+                            <button class="c-wissel__speler">#6 Milan</button>
+                            <button class="c-wissel__speler">#9 Jef</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="c-wissel__titel">Bank</h4>
+                        <div class="c-wissel__lijst js-spelers-bank">
+                            <button class="c-wissel__speler">#12 Tuur</button>
+                            <button class="c-wissel__speler">#15 Lars</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="c-button c-button--primary js-bevestig-wissel">Wissel bevestigen</button>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>
