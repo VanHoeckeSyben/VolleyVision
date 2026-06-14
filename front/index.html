@@ -14,7 +14,8 @@
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
         integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
         crossorigin="anonymous"></script>
-    <script src="script/app.js"></script>
+    <script src="script/dashboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 
 <body class="js-dashboard">
@@ -49,40 +50,23 @@
     </header>
 
     <main class="c-main o-container">
+        <section class="c-dashboard">
+            <a class="c-dashboard__hero" href="matchinstellen.html">
+                <img class="c-dashboard__hero-img" src="images/TuloVisuals-20.jpg" alt="Volleybalmatch">
+                <div class="c-dashboard__hero-overlay"></div>
 
-        <section class="c-welkom">
-            <h2 class="c-welkom__titel">Welkom bij VolleyVision</h2>
-            <p class="c-welkom__ondertitel">Automatische voetfoutdetectie</p>
-        </section>
+                <img class="c-dashboard__watermark" src="images/TuloVisualsYellow.svg" alt="Tulo Visuals">
 
-        <div class="o-content">
-            <div class="c-categorieën">
-                <section class="c-categorie">
-                    <div class="c-categorie__icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-play-icon lucide-play">
-                            <path
-                                d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
-                        </svg>
-                    </div>
-                    <h3 class="c-categorie__naam">Nieuwe Match</h3>
-                </section>
-                <section class="c-categorie">
-                    <div class="c-categorie__icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-users-icon lucide-users">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                            <path d="M16 3.128a4 4 0 0 1 0 7.744" />
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                            <circle cx="9" cy="7" r="4" />
-                        </svg>
-                    </div>
-                    <h3 class="c-categorie__naam">Spelerslijst</h3>
-                </section>
-                <section class="c-categorie">
-                    <div class="c-categorie__icon">
+                <div class="c-dashboard__hero-card">
+                    <h2 class="c-dashboard__hero-title">Nieuwe Match</h2>
+                    <p class="c-dashboard__hero-text">Start een nieuwe wedstrijd met automatische voetfoutdetectie.</p>
+                    <span class="c-dashboard__hero-button">Start Nu</span>
+                </div>
+            </a>
+
+            <div class="c-dashboard__side">
+                <a class="c-dashboard-card c-dashboard-card--stats" href="statistieken.html">
+                    <div class="c-dashboard-card__icon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="lucide lucide-chart-column-big-icon lucide-chart-column-big">
@@ -91,47 +75,49 @@
                             <rect x="7" y="8" width="4" height="9" rx="1" />
                         </svg>
                     </div>
-                    <h3 class="c-categorie__naam">Statistieken</h3>
-                </section>
-                <section class="c-categorie">
-                    <div class="c-categorie__icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="lucide lucide-settings-icon lucide-settings">
-                            <path
-                                d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
-                            <circle cx="12" cy="12" r="3" />
-                        </svg>
-                    </div>
-                    <h3 class="c-categorie__naam">Instellingen</h3>
-                </section>
-            </div>
-            <aside class="c-systeemstatus">
-                <h4 class="c-systeemstatus__titel">Systeemstatus</h4>
-                <div class="c-systeemstatus__kaarden">
-                    <div class="c-status-kaart">
-                        <p class="c-status-kaart__naam">ESP32</p>
-                        <p class="c-status-kaart__waarde u-status__actief">Verbonden</p>
-                    </div>
-                    <div class="c-status-kaart">
-                        <p class="c-status-kaart__naam">Druksensor</p>
-                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" data-sensor="Druksensor">0 N
-                        </p>
-                    </div>
-                    <div class="c-status-kaart">
-                        <p class="c-status-kaart__naam">Lasersensor</p>
-                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" data-sensor="Lasersensor">
-                            vrij</p>
-                    </div>
-                    <div class="c-status-kaart">
-                        <p class="c-status-kaart__naam">Geluidsensor</p>
-                        <p class="c-status-kaart__waarde u-status__actief js-sensorvalue" data-sensor="Geluidsensor">50
-                            db</p>
-                    </div>
-                </div>
-            </aside>
-        </div>
 
+                    <h3 class="c-dashboard-card__title">Bekijk Statistieken</h3>
+                    <p class="c-dashboard-card__text">Analyseer de laatste matchen.</p>
+
+                    <div class="c-mini-chart js-mini-chart"></div>
+
+                    <span class="c-dashboard-card__button">Ga naar Stats</span>
+                </a>
+
+                <div class="c-dashboard__smallgrid">
+                    <a class="c-dashboard-card c-dashboard-card--small" href="spelerslijst.html">
+                        <div class="c-dashboard-card__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-users-icon lucide-users">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <path d="M16 3.128a4 4 0 0 1 0 7.744" />
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        <h3 class="c-dashboard-card__title">Spelerslijst</h3>
+                        <p class="c-dashboard-card__text">Beheer spelers</p>
+                        <span class="c-dashboard-card__link">Bekijk</span>
+                    </a>
+
+                    <a class="c-dashboard-card c-dashboard-card--small" href="instellingen.html">
+                        <div class="c-dashboard-card__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
+                                <path
+                                    d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </div>
+                        <h3 class="c-dashboard-card__title">Instellingen</h3>
+                        <p class="c-dashboard-card__text">Systeem instellingen</p>
+                        <span class="c-dashboard-card__link">Bekijk</span>
+                    </a>
+                </div>
+            </div>
+        </section>
     </main>
 
 </body>
