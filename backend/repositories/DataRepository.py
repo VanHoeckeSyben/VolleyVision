@@ -125,9 +125,9 @@ class DataRepository:
         return Database.execute_sql(sql, params)
     
     @staticmethod
-    def update_instelling(naam, value, instelling_id):
-        sql = "UPDATE Settings SET setting_naam = %s, setting_value = %s WHERE setting_id = %s"
-        params = [naam, value, instelling_id]
+    def update_instelling(value, instelling_id):
+        sql = "UPDATE Settings SET setting_value = %s WHERE setting_id = %s"
+        params = [value, instelling_id]
         return Database.execute_sql(sql, params)
     
     @staticmethod

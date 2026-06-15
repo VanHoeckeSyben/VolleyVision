@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VolleyVision</title>
+    <link rel="stylesheet" href="style/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script src="script/instellingen.js"></script>
+</head>
+
+<body class="js-instellingen">
+    <header class="c-header">
+        <div class="c-header__inner">
+            <h1 class="c-header__titel">VolleyVision</h1>
+            <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
+                    <path d="M4 5h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 19h16" />
+                </svg></button>
+            <nav class="c-nav">
+                <ul class="c-nav__list">
+                    <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
+                            href="index.html" data-navlink="Home">Home</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink"
+                            href="matchinstellen.html" data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink"
+                            href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--stats"><a class="c-nav__link js-navlink"
+                            href="statistieken.html" data-navlink="Stats">Stats</a>
+                    </li>
+                    <li class="c-nav__listitem c-nav__listitem--instellingen"><a
+                            class="c-nav__link js-navlink c-nav__actief" href="instellingen.html"
+                            data-navlink="Instellingen">Instellingen</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="c-main o-container">
+        <section class="c-welkom">
+            <h2 class="c-welkom__titel">Instellingen</h2>
+            <p class="c-welkom__ondertitel">Beheer de systeeminstellingen van VolleyVision</p>
+        </section>
+
+        <section class="c-instellingen">
+            <article class="c-instellingenkaart">
+                <h3 class="c-instellingenkaart__titel">Systeeminstellingen</h3>
+
+                <div class="c-instelling">
+                    <div>
+                        <p class="c-instelling__naam">Serve tijdslimiet</p>
+                        <p class="c-instelling__info">Maximale tijd voor een serve</p>
+                    </div>
+                    <input class="c-instelling__input js-serve-tijdslimiet js-value" data-settingid="4" type="number"
+                        min="1" value="15">
+                </div>
+
+                <div class="c-instelling">
+                    <div>
+                        <p class="c-instelling__naam">Geluidsensor gevoeligheid</p>
+                        <p class="c-instelling__info">Drempelwaarde in dB</p>
+                    </div>
+                    <input class="c-instelling__input js-geluid-drempel js-value" data-settingid="2" type="number"
+                        min="0" value="65">
+                </div>
+
+                <div class="c-instelling">
+                    <div>
+                        <p class="c-instelling__naam">Druksensor drempelwaarde</p>
+                        <p class="c-instelling__info">Minimale drukwaarde in N</p>
+                    </div>
+                    <input class="c-instelling__input js-druk-drempel js-value" data-settingid="1" type="number" min="0"
+                        value="10">
+                </div>
+
+                <div class="c-instelling">
+                    <div>
+                        <p class="c-instelling__naam">Speaker aan</p>
+                        <p class="c-instelling__info">Geluid bij voetfout</p>
+                    </div>
+                    <label class="c-switch">
+                        <input class="js-speaker-aan js-value" data-settingid="5" type="checkbox">
+                        <span class="c-slider c-round"></span>
+                    </label>
+                </div>
+
+                <div class="c-instelling">
+                    <div>
+                        <p class="c-instelling__naam">LED-strip aan</p>
+                        <p class="c-instelling__info">Visuele feedback tijdens match</p>
+                    </div>
+                    <label class="c-switch">
+                        <input class="js-led-aan js-value" data-settingid="3" type="checkbox">
+                        <span class="c-slider c-round"></span>
+                    </label>
+                </div>
+
+                <button class="c-instellingen__opslaan js-save-settings">Opslaan</button>
+                <p class="c-instellingen__feedback js-settings-feedback"></p>
+            </article>
+
+            <article class="c-instellingenkaart">
+                <h3 class="c-instellingenkaart__titel">Sensoren testen</h3>
+
+                <div class="c-sensorlijst">
+                    <div class="c-sensorkaart">
+                        <p class="c-sensorkaart__naam">Lasersensor</p>
+                        <p class="c-sensorkaart__waarde js-sensorvalue" data-sensor="Lasersensor">Huidige waarde: vrij
+                        </p>
+                    </div>
+
+                    <div class="c-sensorkaart">
+                        <p class="c-sensorkaart__naam">Druksensor</p>
+                        <p class="c-sensorkaart__waarde js-sensorvalue" data-sensor="Druksensor">Huidige waarde: 0 N</p>
+                    </div>
+
+                    <div class="c-sensorkaart">
+                        <p class="c-sensorkaart__naam">Geluidsensor</p>
+                        <p class="c-sensorkaart__waarde js-sensorvalue" data-sensor="Geluidsensor">Huidige waarde: 0 dB
+                        </p>
+                    </div>
+                </div>
+            </article>
+
+            <button class="c-shutdown js-open-shutdown">Raspberry Pi afsluiten</button>
+        </section>
+
+        <div class="c-modal js-shutdown-modal">
+            <div class="c-modal__overlay js-close-shutdown"></div>
+
+            <div class="c-modal__content">
+                <button class="c-modal__close js-close-shutdown">×</button>
+                <h3 class="c-modal__titel">Raspberry Pi afsluiten?</h3>
+                <p class="c-modal__tekst">Weet je zeker dat je het systeem volledig wil afsluiten?</p>
+
+                <div class="c-modal__acties">
+                    <button
+                        class="c-modal__acties--knop c-modal__acties--annuleren js-close-shutdown">Annuleren</button>
+                    <button
+                        class="c-modal__acties--knop c-modal__acties--verwijderen js-confirm-shutdown">Afsluiten</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

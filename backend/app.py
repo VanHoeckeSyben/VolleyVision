@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOPatchOpstelling, DTOPatchSpeler
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler
 from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
@@ -84,6 +84,8 @@ ENDPOINT = "/api/v1"  # Define the endpoint for the API
 def gpio_keep_alive():
     global serve_actief
     global teller_serve_id
+    global esp32_connected
+    
     def data_received(data):
         global druk_actief
         data = str(data).strip()
@@ -127,9 +129,15 @@ def gpio_keep_alive():
     c = None
 
     try:
-        c = BluetoothClient("ESP32_VolleyVision", data_received)
-        
         while True:
+            if c is None:
+                try:
+                    c = BluetoothClient("ESP32_VolleyVision", data_received)
+                    print("ESP32 verbonden")
+                except Exception as e:
+                    print("ESP32 niet verbonden:", e)
+                    time.sleep(5)
+
             status_knop1 = not GPIO.input(KNOP1)
 
             if status_knop1 and not serve_actief:
@@ -472,19 +480,22 @@ async def update_speler(speler_id: int, speler_gegevens: DTOSpeler):
 
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
-@app.put(ENDPOINT + "/instellingen/{instelling_id}", response_model=Instelling, summary="Instellingen updaten")
-async def update_instelling(instelling_id: int, instelling_gegevens: DTOInstelling):
-    response_id = DataRepository.update_instelling(instelling_gegevens.naam, instelling_gegevens.value, instelling_id)
-    if not response_id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Geen instelling om te updaten")
+@app.put(ENDPOINT + "/instellingen", response_model=Instellingen, summary="Instellingen updaten")
+async def update_instelling(instellingen: DTOInstellingen):
+    
+    list_instellingen = []
+    
+    for instelling in instellingen.instellingen:
+        response_id = DataRepository.update_instelling(instelling.value, instelling.instelling_id)
 
-    data = DataRepository.read_instelling_by_id(instelling_id)
+    data = DataRepository.read_alle_instellingen()
+    
+    for instelling in data:
+            
+        instelling = Instelling(instelling_id=int(instelling["setting_id"]), naam=instelling["setting_naam"], value=instelling["setting_value"])
+        list_instellingen.append(instelling)
 
-    if not data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instelling niet gevonden")
-
-    return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
-
+    return Instellingen(instellingen=list_instellingen)
 
 # Aanpassen van 1 bepaald iets
 
