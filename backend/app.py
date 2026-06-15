@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler, LastMatch
 from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
@@ -35,9 +35,12 @@ KNOP2 = 17
 led_state = True  # globale staat bovenaan
 async_loop = None
 serve_actief = False
-teller_serve_id = 1
+teller_serve_id = 0
+serve_id = 0
 device_id = -1
-druk_actief = False
+druk_actief = True
+laser_actief = True
+geluid_actief = True
 max_spelers = 12
 
 # ----------------------------------------------------
@@ -88,6 +91,8 @@ def gpio_keep_alive():
     
     def data_received(data):
         global druk_actief
+        global laser_actief
+        global geluid_actief
         data = str(data).strip()
 
         regels = data.split("\n")
@@ -102,31 +107,24 @@ def gpio_keep_alive():
 
             asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_sensoren", {"sensornaam": sensor, "value": value}),async_loop)
         
-            if sensor == "Druksensor": 
-                device_id = 1
-                if value != "0N" and not druk_actief:
-                    druk_actief = True
-                    if serve_actief:
-                        DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
-                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
-                elif value == "0N" and serve_actief:
-                    druk_actief = False
-                    if serve_actief:
-                        DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=0, event_tijd=datetime.now())
-                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+            if sensor == "Druksensor" and serve_actief and druk_actief:
+                druk_actief = False
+                DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                         
-            if sensor == "Lasersensor": 
-                device_id = 2
-                if serve_actief:
-                    DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
-                    asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
-            if sensor == "Geluidsensor": 
-                device_id = 3
-                if serve_actief:
-                    DataRepository.add_sensorevent(serve_id=teller_serve_id, device_id=device_id, waarde=value, event_tijd=datetime.now())
-                    asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+            if sensor == "Lasersensor" and serve_actief and laser_actief: 
+                laser_actief = False
+                DataRepository.add_sensorevent(serve_id=serve_id, device_id=3, waarde=value, event_tijd=datetime.now())
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
+                
+            if sensor == "Geluidsensor" and serve_actief and geluid_actief:
+                geluid_actief = False
+                DataRepository.add_sensorevent(serve_id=serve_id, device_id=3, waarde=value, event_tijd=datetime.now())
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
 
     c = None
+    
+    GPIO.output(LED, GPIO.HIGH)
 
     try:
         while True:
@@ -139,23 +137,30 @@ def gpio_keep_alive():
                     time.sleep(5)
 
             status_knop1 = not GPIO.input(KNOP1)
+            
+            serve_limiet = DataRepository.read_instelling_by_id(4)["setting_value"] * 10
 
             if status_knop1 and not serve_actief:
                 serve_actief = True
-                GPIO.output(LED, GPIO.LOW)
-                
                 start_tijd = datetime.now()
+                
+                serve_id = DataRepository.add_serve(speler_id=1, match_id=1, start_tijd=start_tijd, eind_tijd=0)
+                GPIO.output(LED, GPIO.LOW)
 
                 teller = 0
-                while teller < 80 and not not GPIO.input(KNOP2):
+                while teller < serve_limiet and not not GPIO.input(KNOP2):
                     time.sleep(0.1)
                     teller += 1
 
                 serve_actief = False
+                druk_actief = True
+                laser_actief = True
+                geluid_actief = True
                 eind_tijd = datetime.now()
                 GPIO.output(LED, GPIO.HIGH)
                 
-                teller_serve_id = DataRepository.add_serve(speler_id=1, match_id=1, start_tijd=start_tijd, eind_tijd=eind_tijd)
+                DataRepository.patch_serve(eind_tijd=eind_tijd, serve_id=serve_id)
+                
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
 
             time.sleep(0.1)
@@ -182,7 +187,7 @@ async def read_alle_matchen():
 
     list_matchen = []
     for item in data:
-        match = Match(match_id=int(item["match_id"]), datum=item["datum"], locatie=item["locatie"], opslag_wij=int(item["opslag_wij"]))
+        match = Match(match_id=int(item["match_id"]), datum=item["datum"], locatie=item["locatie"], opslag_wij=int(item["opslag_wij"]), active=int(item["active"]))
         list_matchen.append(match)
 
     return Matchen(matchen=list_matchen)
@@ -192,9 +197,18 @@ async def read_match_by_id(match_id: int):
     data = DataRepository.read_match_by_id(match_id)
     
     if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="match niet gevonden")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
 
-    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]))
+    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]), active=int(data["active"]))
+
+@app.get(ENDPOINT + "/lastmatch", response_model=LastMatch, summary="Kijken of de laatste match bezig is")
+async def read_last_match():
+    data = DataRepository.read_last_match()
+    
+    if not data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+    
+    return LastMatch(match_id=int(data["match_id"]), active=int(data["active"]))
 
 @app.get(ENDPOINT + "/serves", response_model=Serves, summary="Ophalen van alle serves")
 async def read_alle_serves():
@@ -377,8 +391,10 @@ async def add_match(match_gegevens: DTOMatch):
     
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+        
+    await sio.emit('B2F_nieuwe_match', {"match_id": data["match_id"]})
             
-    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]))
+    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]), active=int(data["active"]))
 
 @app.post(ENDPOINT + "/spelers", response_model=Speler, summary="Speler toevoegen")
 async def add_speler(speler_gegevens: DTOSpeler):
@@ -533,6 +549,22 @@ async def patch_speler(speler_id: int, speler_gegevens: DTOPatchSpeler):
     await sio.emit('B2F_delete_speler', {})
 
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
+
+@app.patch(ENDPOINT + "/matchen/${match_id}", response_class=Match, summary="Stoppen van een match")
+async def stop_match(match_id: int):
+    response_id = DataRepository.stop_match(match_id)
+    
+    if not response_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Geen match gevonden om te stoppen")
+    
+    data = DataRepository.read_match_by_id(match_id)
+
+    if not data:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Match niet gevonden")
+    
+    await sio.emit('B2F_stop_match', {"match_id": match_id})
+    
+    return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]), active=int(data["active"]))
     
 # ----------------------------------------------------
 # Socket.IO Handlers

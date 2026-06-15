@@ -6,6 +6,7 @@ class Match(BaseModel):
     datum: date
     locatie: str
     opslag_wij: int
+    active: int
     
 class Matchen(BaseModel):
     matchen: list[Match]
@@ -115,3 +116,7 @@ class DTOPatchOpstelling(BaseModel):
     
 class DTOPatchSpeler(BaseModel):
     actief: int
+    
+class LastMatch(BaseModel):
+    match_id: int
+    active: int
