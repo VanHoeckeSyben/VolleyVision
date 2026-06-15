@@ -21,23 +21,19 @@ const showSettings = (json) => {
     htmlSpeakerAan.checked = settings[4].value;
 };
 
-const showSaveSettings = () => {
+const showSaveSettings = (json) => {
     htmlSettingsFeedback.innerHTML = 'Instellingen opgeslagen';
-};
 
-const showOpenShutdownModal = () => {
-    htmlShutdownModal.classList.add('u-active');
-};
-
-const showCloseShutdownModal = () => {
-    htmlShutdownModal.classList.remove('u-active');
+    setTimeout(() => {
+        htmlSettingsFeedback.innerHTML = '';
+    }, 3000);
 };
 
 const showSensorUpdate = (json) => {
     const htmlSensor = document.querySelector(`.js-sensorvalue[data-sensor="${json.sensornaam}"]`);
 
     if (htmlSensor) {
-        htmlSensor.innerHTML = `Huidige waarde: ${json.waarde}`;
+        htmlSensor.innerHTML = `Huidige waarde: ${json.value}`;
     }
 };
 // #endregion
@@ -52,13 +48,40 @@ const getSettings = async () => {
 }
 
 const getSaveSettings = async () => {
-    const url = ``;
+    const body = JSON.stringify({
+        instellingen: [
+            {
+                instelling_id: htmlDrukDrempel.dataset.settingid,
+                value: htmlDrukDrempel.value
+            },
+            {
+                instelling_id: htmlGeluidDrempel.dataset.settingid,
+                value: htmlGeluidDrempel.value
+            },
+            {
+                instelling_id: htmlLedAan.dataset.settingid,
+                value: htmlLedAan.checked
+            },
+            {
+                instelling_id: htmlServeTijdslimiet.dataset.settingid,
+                value: htmlServeTijdslimiet.value
+            },
+            {
+                instelling_id: htmlSpeakerAan.dataset.settingid,
+                value: htmlSpeakerAan.checked
+            }
+        ]
+    });
+
+    const url = `${API}/instellingen`;
     const response = await fetch(url, {
-        method: 'POST',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: body
     }).catch((err) => console.error('Fetch-error:', err));
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
+
+    showSaveSettings(json);
 };
 
 const getShutdownPi = async () => {
@@ -81,23 +104,22 @@ const listenToSaveSettings = () => {
 
 const listenToShutdown = () => {
     htmlOpenShutdown.addEventListener('click', () => {
-        showOpenShutdownModal();
+        htmlShutdownModal.classList.add('u-active');
     });
 
     htmlCloseShutdown.forEach((button) => {
         button.addEventListener('click', () => {
-            showCloseShutdownModal();
+            htmlShutdownModal.classList.remove('u-active');
         });
     });
 
     htmlConfirmShutdown.addEventListener('click', () => {
         getShutdownPi();
-        showCloseShutdownModal();
+        htmlShutdownModal.classList.remove('u-active');
     });
 };
 
 const listenToSocket = () => {
-    const socketio = io(`${window.location.hostname}:8000`);
 
     socketio.on('B2F_verandering_sensoren', (json) => {
         showSensorUpdate(json);

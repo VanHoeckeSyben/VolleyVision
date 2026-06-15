@@ -104,8 +104,11 @@ class SensorEvents(BaseModel):
     sensorevents: list[SensorEvent]
     
 class DTOInstelling(BaseModel):
-    naam: str
+    instelling_id: int
     value: int
+    
+class DTOInstellingen(BaseModel):
+    instellingen: list[DTOInstelling]
     
 class DTOPatchOpstelling(BaseModel):
     veld_positie: int
