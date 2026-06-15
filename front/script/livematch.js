@@ -9,9 +9,7 @@ let htmlVorigeServerNummer, htmlVorigeServerNaam, htmlHuidigeServerNummer, htmlH
 let htmlVolgendeServerNummer, htmlVolgendeServerNaam, htmlVorigeServerBtn, htmlVolgendeServerBtn;
 let htmlStartServe, htmlServeTijd, htmlServeProgress, htmlVoetfoutStatus, htmlServeStatus, htmlServeLog;
 let htmlOpenWissel, htmlWisselModal, htmlCloseWissel, htmlSpelersVeld, htmlSpelersBank, htmlBevestigWissel;
-// #endregion
 
-// #region ***  Global variables                         ***********
 let matchId;
 let matchData;
 let opstelling = [];
@@ -22,13 +20,10 @@ let serveTeller = 0;
 let serveStartTijd;
 let geselecteerdeVeldSpeler = null;
 let geselecteerdeBankSpeler = null;
-// #endregion
 
-// #region ***  Helpers                                  ***********
-const getMatchIdFromUrl = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('matchId');
-};
+let opslagGedaan = false;
+let isTerugGegaan = false
+// #endregion
 
 const formatDateTimeForApi = (date) => {
     const jaar = date.getFullYear();
@@ -40,21 +35,6 @@ const formatDateTimeForApi = (date) => {
 
     return `${jaar}-${maand}-${dag} ${uur}:${minuten}:${seconden}`;
 };
-
-const getSpelerOpPositie = (positie) => {
-    return opstelling.find((speler) => Number(speler.veld_positie) === Number(positie));
-};
-
-const getSpelerById = (spelerId) => {
-    let speler = opstelling.find((speler) => Number(speler.speler_id) === Number(spelerId));
-
-    if (!speler) {
-        speler = actieveSpelers.find((speler) => Number(speler.speler_id) === Number(spelerId));
-    }
-
-    return speler;
-};
-// #endregion
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showServers = () => {
@@ -197,6 +177,25 @@ const showWisselSpelers = () => {
 // #endregion
 
 // #region ***  Data Access - get___                     ***********
+const getMatchIdFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('matchId');
+};
+
+const getSpelerOpPositie = (positie) => {
+    return opstelling.find((speler) => Number(speler.veld_positie) === Number(positie));
+};
+
+const getSpelerById = (spelerId) => {
+    let speler = opstelling.find((speler) => Number(speler.speler_id) === Number(spelerId));
+
+    if (!speler) {
+        speler = actieveSpelers.find((speler) => Number(speler.speler_id) === Number(spelerId));
+    }
+
+    return speler;
+};
+
 const getMatch = async () => {
     const url = `${API}/matchen/${matchId}`;
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
@@ -253,7 +252,9 @@ const getPostServe = async (spelerId, startTijd, eindTijd) => {
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
     console.log(json);
 
-    getServesByMatch();
+    await getServesByMatch();
+
+    return json
 };
 
 const getPatchOpstelling = async (spelerId, veldPositie) => {
@@ -343,7 +344,7 @@ const getPatchWissel = async () => {
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const stopServe = (voetfout) => {
+const listenToStopServe = async (voetfout) => {
     if (!serveActief) {
         return;
     }
@@ -357,7 +358,9 @@ const stopServe = (voetfout) => {
     showServeStatus(voetfout);
     showStartServeButton();
 
-    getPostServe(huidigeServer.speler_id, serveStartTijd, eindTijd);
+    await getPostServe(huidigeServer.speler_id, serveStartTijd, eindTijd);
+
+    opslagGedaan = true;
 };
 
 const listenToStartServe = () => {
@@ -376,22 +379,30 @@ const listenToStartServe = () => {
                 showServeTimer();
 
                 if (serveTeller >= 8) {
-                    stopServe('Te lang');
+                    listenToStopServe('Te lang');
                 }
             }, 100);
         } else {
-            stopServe('Geen');
+            listenToStopServe('Geen');
         }
     });
 };
 
 const listenToServerButtons = () => {
-    htmlVolgendeServerBtn.addEventListener('click', () => {
-        getRotateVolgendeServer();
+    htmlVolgendeServerBtn.addEventListener('click', async () => {
+        if (opslagGedaan) {
+            await getRotateVolgendeServer();
+            opslagGedaan = false;
+            isTerugGegaan = false;
+        };
     });
 
-    htmlVorigeServerBtn.addEventListener('click', () => {
-        getRotateVorigeServer();
+    htmlVorigeServerBtn.addEventListener('click', async () => {
+        if (!opslagGedaan && !isTerugGegaan) {
+            await getRotateVorigeServer();
+            opslagGedaan = false;
+            isTerugGegaan = true;
+        };
     });
 };
 
@@ -452,6 +463,7 @@ const listenToStopButton = () => {
         window.location.href = `index.html`;
     })
 }
+
 // #endregion
 
 // #region ***  Init / DOMContentLoaded                  ***********
@@ -493,10 +505,6 @@ const init = async () => {
     await getOpstelling();
     await getActieveSpelers();
 
-    if (Number(matchData.opslag_wij) === 0) {
-        await getRotateVolgendeServer();
-    }
-
     showServers();
     showServeTimer();
     showServeStatus('Geen');
@@ -508,6 +516,7 @@ const init = async () => {
     listenToServerButtons();
     listenToWisselModal();
     listenToStopButton();
+    listenToSocket();
 };
 
 document.addEventListener('DOMContentLoaded', init);

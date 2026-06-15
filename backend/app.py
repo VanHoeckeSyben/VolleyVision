@@ -461,6 +461,8 @@ async def add_serve(serve_gegevens: DTOServe):
 
     if not data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Serve niet gevonden")
+        
+    await sio.emit('B2F_nieuwe_serve', {})
 
     return Serve(serve_id=int(data["serve_id"]), speler_id=int(data["speler_id"]), match_id=int(data["match_id"]), start_tijd=data["start_tijd"], eind_tijd=data["eind_tijd"])
     
