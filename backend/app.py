@@ -39,6 +39,7 @@ teller_serve_id = 1
 device_id = -1
 druk_actief = False
 max_spelers = 12
+esp32_connected = False
 
 # ----------------------------------------------------
 # App setup
@@ -84,6 +85,8 @@ ENDPOINT = "/api/v1"  # Define the endpoint for the API
 def gpio_keep_alive():
     global serve_actief
     global teller_serve_id
+    global esp32_connected
+    
     def data_received(data):
         global druk_actief
         data = str(data).strip()
@@ -127,9 +130,17 @@ def gpio_keep_alive():
     c = None
 
     try:
-        c = BluetoothClient("ESP32_VolleyVision", data_received)
-        
         while True:
+            if c is None:
+                try:
+                    c = BluetoothClient("ESP32_VolleyVision", data_received)
+                    esp32_connected = True
+                    print("ESP32 verbonden")
+                except Exception as e:
+                    print("ESP32 niet verbonden:", e)
+                    esp32_connected = False
+                    time.sleep(5)
+
             status_knop1 = not GPIO.input(KNOP1)
 
             if status_knop1 and not serve_actief:
