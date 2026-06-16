@@ -37,6 +37,7 @@ KNOP2 = 17
 LED_COUNT = 31
 SKIP_LEDS = 2
 PIN = board.D18
+SPEAKERS = 27
 
 # global variables
 led_state = True
@@ -50,6 +51,8 @@ geluid_actief = True
 max_spelers = 12
 serve_status = False
 ip_actief = True
+voetfout = False
+pwm = 0
 
 # ----------------------------------------------------
 # App setup
@@ -64,6 +67,7 @@ async def lifespan_manager(app: FastAPI):
 
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(LED,GPIO.OUT)
+    GPIO.setup(SPEAKERS,GPIO.OUT)
     GPIO.setup(KNOP1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(KNOP2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     logger.info("GPIO initialised")
@@ -101,6 +105,8 @@ def gpio_keep_alive():
     global laser_actief
     global geluid_actief
     global ip_actief
+    global voetfout
+    global pwm
     
     c = None
     
@@ -108,6 +114,7 @@ def gpio_keep_alive():
         global lcd
         global strip
         global ip
+        global pwm
         
         GPIO.output(LED, GPIO.HIGH)
         lcd = LCD()
@@ -118,13 +125,21 @@ def gpio_keep_alive():
         lcd.message("VolleyVision", 1)
         lcd.message(ip, 2)
         
-        strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.1, auto_write=False)
+        strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.5, auto_write=False)
+        
+        pwm = GPIO.PWM(SPEAKERS, 100)
+        pwm.start(0)
     
     setup()
     
     def alles_uit():
         for i in range(SKIP_LEDS, LED_COUNT):
             strip[i] = (0, 0, 0)
+        strip.show()
+        
+    def alles_aan(color):
+        for i in range(SKIP_LEDS, LED_COUNT):
+            strip[i] = color
         strip.show()
     
     def data_received(data):
@@ -147,7 +162,7 @@ def gpio_keep_alive():
         
             if sensor == "Druksensor" and serve_actief and druk_actief:
                 druk_actief = False
-                test = DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
+                DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                         
             if sensor == "Lasersensor" and serve_actief and laser_actief: 
@@ -213,9 +228,11 @@ def gpio_keep_alive():
                     
                     if (not druk_actief or not laser_actief) and geluid_actief:
                         print("Fout")
+                        voetfout = True
                         break
                     elif not geluid_actief:
                         print("Geen Fout")
+                        voetfout = False
                         break
                     
                     time.sleep(0.05)
@@ -235,6 +252,23 @@ def gpio_keep_alive():
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_nieuwe_serve"),async_loop)
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_serve_status", {"status": serve_status, "stopTimeStamp": time.time() * 1000}),async_loop)
                 
+            if voetfout:
+                teller = 0
+                pwm.start(0)
+                while teller <= 10:
+                    alles_aan((255, 0, 0))
+                    time.sleep(0.1)
+                    alles_uit()
+                    time.sleep(0.1)
+                    
+                    pwm.ChangeDutyCycle(80)
+                    pwm.ChangeFrequency(120)
+                    
+                    teller += 1
+                voetfout = False
+                pwm.ChangeDutyCycle(0)
+                pwm.stop()
+                      
             status_knop2 = not GPIO.input(KNOP2)
             afsluit_teller = 0
             
@@ -242,7 +276,8 @@ def gpio_keep_alive():
                 ip_actief = True
                 status_knop2 = not GPIO.input(KNOP2)
                 
-                lcd.message(f"{afsluit_teller/10}", 2)
+                if afsluit_teller >= 10:
+                    lcd.message(f"{afsluit_teller/10}", 2)
                 
                 if afsluit_teller == 50:
                     run(["sudo", "shutdown", "-h", "now"])
@@ -260,6 +295,9 @@ def gpio_keep_alive():
     finally:
         if c:
             c.disconnect()
+        pwm.ChangeDutyCycle(0)
+        pwm.stop()
+        GPIO.cleanup()
 
 # ----------------------------------------------------
 # FastAPI Endpoints
