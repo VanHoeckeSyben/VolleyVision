@@ -13,7 +13,7 @@ from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
 from klassen.LCD import LCD
-from subprocess import check_output
+from subprocess import check_output, run
 import board
 import neopixel
 
@@ -49,6 +49,7 @@ laser_actief = True
 geluid_actief = True
 max_spelers = 12
 serve_status = False
+ip_actief = True
 
 # ----------------------------------------------------
 # App setup
@@ -99,12 +100,14 @@ def gpio_keep_alive():
     global druk_actief
     global laser_actief
     global geluid_actief
+    global ip_actief
     
     c = None
     
     def setup():
         global lcd
         global strip
+        global ip
         
         GPIO.output(LED, GPIO.HIGH)
         lcd = LCD()
@@ -231,6 +234,25 @@ def gpio_keep_alive():
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_nieuwe_serve"),async_loop)
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_serve_status", {"status": serve_status, "stopTimeStamp": time.time() * 1000}),async_loop)
+                
+            status_knop2 = not GPIO.input(KNOP2)
+            afsluit_teller = 0
+            
+            while status_knop2 and afsluit_teller <= 50:
+                ip_actief = True
+                status_knop2 = not GPIO.input(KNOP2)
+                
+                lcd.message(f"{afsluit_teller/10}", 2)
+                
+                if afsluit_teller == 50:
+                    run(["sudo", "shutdown", "-h", "now"])
+                
+                afsluit_teller += 1
+                time.sleep(0.1)
+                
+            if ip_actief:
+                lcd.message(ip, 2)
+                ip_actief = False
 
     except KeyboardInterrupt:
         print("Gestopt door keyboard")
@@ -635,6 +657,12 @@ async def stop_match(match_id: int):
     
     return Match(match_id=int(data["match_id"]), datum=data["datum"], locatie=data["locatie"], opslag_wij=int(data["opslag_wij"]), active=int(data["active"]))
     
+    
+# Systeem shutdown
+@app.post(ENDPOINT + "/systeem/afsluiten", summary="Afsluiten van de Raspberry Pi")
+async def afsluiten_pi():
+    run(["sudo", "shutdown", "-h", "now"])
+
 # ----------------------------------------------------
 # Socket.IO Handlers
 # ----------------------------------------------------
