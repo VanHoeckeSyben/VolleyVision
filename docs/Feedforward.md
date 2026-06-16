@@ -149,7 +149,7 @@ Dit is de feedback op mijn vragen.
 
 ## Gesprek 9 (Toermoment) (Datum: 09/06/2026)
 
-Lector: Geert Desloovere, Stijn Walcarius, 
+Lector: Geert Desloovere, Stijn Walcarius
 
 Vragen voor dit gesprek:
 
@@ -173,3 +173,34 @@ Dit is de feedback op mijn vragen.
 - feedback 2: Knoppen allemaal geel maken ipv verschillende kleuren
 - feedback 3: Max aantal spelers instellen
 - feedback 4: Systeemstatus uit dashboard en naar instellingen verplaatsen
+
+## Gesprek 11 (Consult) (Datum: 15/06/2026)
+
+Lector: Christophe Laprudence
+
+Vragen voor dit gesprek:
+
+- vraag 1: Kan ik feedback krijgen op mijn website UI na de aanpassingen
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Namen in dropdown menu van nieuwe match pagina naar links uitlijnen
+- feedback 2: Opslag wij/tegenstander duidelijker maken met een dropdown menu
+- feedback 3: Speler wisselen op de live match pagina apart zetten
+- feedback 4: nog net iets meer verschil maken tussen huige opslaggever en vorige/volgende
+- feedback 5: Alles werkt, is functioneel en ziet er goed uit. Dus alleen aanpassen bij tijd
+
+## Gesprek 12 (Toermoment) (Datum: 16/06/2026)
+
+Lector: Christophe Laprudence, Dieter Roobrouck, Frederiek Berthier
+
+Vragen voor dit gesprek:
+
+- vraag 1: /
+
+Dit is de feedback op mijn vragen.
+
+- feedback 1: Trendlijn grafiek ook aanpassen als je sorteert op match
+- feedback 2: Feedback op ledstrip aan/uit in settings
+- feedback 3: Meest recente matchen boven in de tabel zetten
+- feedback 4: Focus leggen op opstelling koppelen met de website
