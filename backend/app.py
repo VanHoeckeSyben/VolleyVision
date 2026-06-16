@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstelling, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler, LastMatch
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler, LastMatch
 from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
@@ -679,7 +679,7 @@ async def patch_speler(speler_id: int, speler_gegevens: DTOPatchSpeler):
 
     return Speler(speler_id=int(data["speler_id"]), naam=data["naam"], voornaam=data["voornaam"], rugnummer=int(data["rugnummer"]), positie=data["positie"], active=int(data["active"]))
 
-@app.patch(ENDPOINT + "/matchen/${match_id}", response_class=Match, summary="Stoppen van een match")
+@app.patch(ENDPOINT + "/matchen/{match_id}", response_model=Match, summary="Stoppen van een match")
 async def stop_match(match_id: int):
     response_id = DataRepository.stop_match(match_id)
     
@@ -697,7 +697,7 @@ async def stop_match(match_id: int):
     
     
 # Systeem shutdown
-@app.post(ENDPOINT + "/systeem/afsluiten", summary="Afsluiten van de Raspberry Pi")
+@app.post(ENDPOINT + "/systeem/afsluiten", summary="Afsluiten van de Raspberrsy Pi")
 async def afsluiten_pi():
     run(["sudo", "shutdown", "-h", "now"])
 

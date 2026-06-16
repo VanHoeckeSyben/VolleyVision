@@ -358,6 +358,17 @@ const getServeLimiet = async () => {
 
     serveLimiet = json.value;
 };
+
+const getStopMatch = async () => {
+    const body = JSON.stringify({});
+    const url = `${API}/matchen/${matchId}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: body
+    }).catch((err) => console.error('Fetch-error:', err));
+    const json = await response.json().catch((err) => console.error('JSON-error:', err));
+}
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
@@ -467,6 +478,7 @@ const listenToStopButton = () => {
     const stopButton = document.querySelector('.js-stopmatch');
     stopButton.addEventListener('click', (e) => {
         window.location.href = `index.html`;
+        getStopMatch();
     })
 }
 

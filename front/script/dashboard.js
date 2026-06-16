@@ -99,7 +99,7 @@ const showLiveMatch = (json) => {
     htmlLiveMatch.classList.add('u-active');
     htmlNieuweMatch.classList.add('u-disabled');
     htmlLiveMatch.href = `livematch.html?matchId=${json.match_id}`;
-}
+};
 
 const showLastMatch = (json) => {
     console.log(json)
@@ -111,7 +111,7 @@ const showLastMatch = (json) => {
         htmlLiveMatch.classList.remove('u-active');
         htmlNieuweMatch.classList.remove('u-disabled');
     }
-}
+};
 // #endregion
 
 // #region ***  Data Access - get___                     ***********
@@ -152,6 +152,11 @@ const listenToSocket = () => {
     socketio.on('B2F_nieuwe_match', (json) => {
         showLiveMatch(json);
     });
+
+    socketio.on('B2F_stop_match', (json) => {
+        htmlLiveMatch.classList.remove('u-active');
+        htmlNieuweMatch.classList.remove('u-disabled');
+    })
 };
 // #endregion
 
