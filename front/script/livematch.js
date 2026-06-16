@@ -20,9 +20,13 @@ let serveTeller = 0;
 let serveStartTijd;
 let geselecteerdeVeldSpeler = null;
 let geselecteerdeBankSpeler = null;
+let serveStartTimestamp = null;
 
 let opslagGedaan = false;
-let isTerugGegaan = false
+let isTerugGegaan = false;
+let magServeOpslaan = false;
+let stopVerstuurd = false;
+let serveLimiet = 0;
 // #endregion
 
 const formatDateTimeForApi = (date) => {
@@ -35,6 +39,33 @@ const formatDateTimeForApi = (date) => {
 
     return `${jaar}-${maand}-${dag} ${uur}:${minuten}:${seconden}`;
 };
+
+const serveStart = (startTimeStamp) => {
+    if (!serveActief) {
+        serveActief = true;
+        stopVerstuurd = false;
+        serveStartTimestamp = startTimeStamp;
+        serveStartTijd = new Date(startTimeStamp);
+
+        showServeStatus('Geen');
+        showStopServeButton();
+
+        serveTimer = setInterval(() => {
+            const nu = Date.now();
+            serveTeller = (nu - serveStartTimestamp) / 1000;
+
+            showServeTimer();
+
+            if (serveTeller >= 8 && !stopVerstuurd) {
+                stopVerstuurd = true;
+
+                socketio.emit('F2B_serve_status', {'status': false, 'voetfout': 'Te lang'});
+            }
+        }, 100);
+    } else {
+        listenToStopServe('Geen');
+    }
+}
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showServers = () => {
@@ -110,17 +141,23 @@ const showServeLogs = (json) => {
         const speler = getSpelerById(serve.speler_id);
 
         const start = new Date(serve.start_tijd.replace(' ', 'T'));
-        const eind = new Date(serve.eind_tijd.replace(' ', 'T'));
+
+        const eind = serve.eind_tijd
+            ? new Date(serve.eind_tijd.replace(' ', 'T'))
+            : new Date();
 
         const duur = (eind - start) / 1000;
-        const tijd = `${String(eind.getHours()).padStart(2, '0')}:${String(eind.getMinutes()).padStart(2, '0')}:${String(eind.getSeconds()).padStart(2, '0')}`;
+
+        const tijd = serve.eind_tijd
+            ? `${String(eind.getHours()).padStart(2, '0')}:${String(eind.getMinutes()).padStart(2, '0')}:${String(eind.getSeconds()).padStart(2, '0')}`
+            : 'Bezig';
 
         htmlString += `
             <tr>
                 <td>${serve.serve_id}</td>
                 <td>${speler ? `#${speler.rugnummer} ${speler.voornaam}` : serve.speler_id}</td>
                 <td>${duur.toFixed(1)}s</td>
-                <td>${duur > 8 ? 'Te lang' : 'Geen'}</td>
+                <td>${serve.eind_tijd ? (duur > 8 ? 'Te lang' : 'Geen') : 'Bezig'}</td>
                 <td>${tijd}</td>
             </tr>`;
     }
@@ -224,37 +261,9 @@ const getActieveSpelers = async () => {
 const getServesByMatch = async () => {
     const url = `${API}/serves/matchen/${matchId}`;
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
-
-    if (!response || response.status === 404) {
-        showServeLogs({ serves: [] });
-        return;
-    }
-
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
+
     showServeLogs(json);
-};
-
-const getPostServe = async (spelerId, startTijd, eindTijd) => {
-    const body = JSON.stringify({
-        speler_id: Number(spelerId),
-        match_id: Number(matchId),
-        start_tijd: formatDateTimeForApi(startTijd),
-        eind_tijd: formatDateTimeForApi(eindTijd)
-    });
-
-    const url = `${API}/serves`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body
-    }).catch((err) => console.error('Fetch-error:', err));
-
-    const json = await response.json().catch((err) => console.error('JSON-error:', err));
-    console.log(json);
-
-    await getServesByMatch();
-
-    return json
 };
 
 const getPatchOpstelling = async (spelerId, veldPositie) => {
@@ -341,6 +350,14 @@ const getPatchWissel = async () => {
     showServers();
     showCloseWisselModal();
 };
+
+const getServeLimiet = async () => {
+    const url = `${API}/instellingen/4`;
+    const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
+    const json = await response.json().catch((err) => console.error('JSON-error:', err));
+
+    serveLimiet = json.value;
+};
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
@@ -358,32 +375,21 @@ const listenToStopServe = async (voetfout) => {
     showServeStatus(voetfout);
     showStartServeButton();
 
-    await getPostServe(huidigeServer.speler_id, serveStartTijd, eindTijd);
+    if (magServeOpslaan) {
+        magServeOpslaan = false;
+    }
 
     opslagGedaan = true;
 };
 
 const listenToStartServe = () => {
     htmlStartServe.addEventListener('click', () => {
+        magServeOpslaan = true;
+
         if (!serveActief) {
-            serveActief = true;
-            serveTeller = 0;
-            serveStartTijd = new Date();
-
-            showServeTimer();
-            showServeStatus('Geen');
-            showStopServeButton();
-
-            serveTimer = setInterval(() => {
-                serveTeller += 0.1;
-                showServeTimer();
-
-                if (serveTeller >= 8) {
-                    listenToStopServe('Te lang');
-                }
-            }, 100);
+            socketio.emit('F2B_serve_status', {'status': true});
         } else {
-            listenToStopServe('Geen');
+            socketio.emit('F2B_serve_status', {'status': false});
         }
     });
 };
@@ -464,6 +470,19 @@ const listenToStopButton = () => {
     })
 }
 
+const listenToSocket = () => {
+    socketio.on('B2F_nieuwe_serve', () => {
+        getServesByMatch();
+    });
+
+    socketio.on('B2F_serve_status', (json) => {
+        if (json.status) {
+            serveStart(json.startTimeStamp);
+        } else {
+            listenToStopServe(json.voetfout || 'Geen');
+        }
+    });
+};
 // #endregion
 
 // #region ***  Init / DOMContentLoaded                  ***********
@@ -495,6 +514,8 @@ const init = async () => {
     htmlBevestigWissel = document.querySelector('.js-bevestig-wissel');
 
     matchId = getMatchIdFromUrl();
+
+    getServeLimiet();
 
     if (!matchId) {
         alert('Geen matchId gevonden.');

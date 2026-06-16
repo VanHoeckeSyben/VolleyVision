@@ -12,6 +12,10 @@ from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device
 from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
+from klassen.LCD import LCD
+from subprocess import check_output
+import board
+import neopixel
 
 
 # logging
@@ -30,18 +34,21 @@ logger = logging.getLogger(__name__)
 LED = 6
 KNOP1 = 5
 KNOP2 = 17
+LED_COUNT = 31
+SKIP_LEDS = 2
+PIN = board.D18
 
 # global variables
-led_state = True  # globale staat bovenaan
+led_state = True
 async_loop = None
 serve_actief = False
-teller_serve_id = 0
 serve_id = 0
-device_id = -1
+device_id = 0
 druk_actief = True
 laser_actief = True
 geluid_actief = True
 max_spelers = 12
+serve_status = False
 
 # ----------------------------------------------------
 # App setup
@@ -86,8 +93,36 @@ ENDPOINT = "/api/v1"  # Define the endpoint for the API
 
 def gpio_keep_alive():
     global serve_actief
-    global teller_serve_id
     global esp32_connected
+    global serve_id
+    global serve_status
+    global druk_actief
+    global laser_actief
+    global geluid_actief
+    
+    c = None
+    
+    def setup():
+        global lcd
+        global strip
+        
+        GPIO.output(LED, GPIO.HIGH)
+        lcd = LCD()
+        
+        ips = check_output(['hostname', '--all-ip-addresses'])
+        ip = ips.decode('utf-8').strip().split()[1]
+        
+        lcd.message("VolleyVision", 1)
+        lcd.message(ip, 2)
+        
+        strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.1, auto_write=False)
+    
+    setup()
+    
+    def alles_uit():
+        for i in range(SKIP_LEDS, LED_COUNT):
+            strip[i] = (0, 0, 0)
+        strip.show()
     
     def data_received(data):
         global druk_actief
@@ -109,22 +144,18 @@ def gpio_keep_alive():
         
             if sensor == "Druksensor" and serve_actief and druk_actief:
                 druk_actief = False
-                DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
+                test = DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                         
             if sensor == "Lasersensor" and serve_actief and laser_actief: 
                 laser_actief = False
-                DataRepository.add_sensorevent(serve_id=serve_id, device_id=3, waarde=value, event_tijd=datetime.now())
+                DataRepository.add_sensorevent(serve_id=serve_id, device_id=2, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                 
             if sensor == "Geluidsensor" and serve_actief and geluid_actief:
                 geluid_actief = False
                 DataRepository.add_sensorevent(serve_id=serve_id, device_id=3, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
-
-    c = None
-    
-    GPIO.output(LED, GPIO.HIGH)
 
     try:
         while True:
@@ -138,32 +169,68 @@ def gpio_keep_alive():
 
             status_knop1 = not GPIO.input(KNOP1)
             
-            serve_limiet = DataRepository.read_instelling_by_id(4)["setting_value"] * 10
+            serve_limiet = DataRepository.read_instelling_by_id(4)["setting_value"]
 
-            if status_knop1 and not serve_actief:
+            if (status_knop1 or serve_status) and not serve_actief:
                 serve_actief = True
+                serve_status = True
+                start_timestamp = time.time() * 1000
                 start_tijd = datetime.now()
+
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_serve_status", {"status": True, "startTimeStamp": start_timestamp}), async_loop)
                 
-                serve_id = DataRepository.add_serve(speler_id=1, match_id=1, start_tijd=start_tijd, eind_tijd=0)
+                match_id = DataRepository.read_opslaggever()["match_id"]
+                speler_id = DataRepository.read_opslaggever()["speler_id"]
+                
+                serve_id = DataRepository.add_serve(speler_id=speler_id, match_id=match_id, start_tijd=start_tijd, eind_tijd=None)
                 GPIO.output(LED, GPIO.LOW)
 
-                teller = 0
-                while teller < serve_limiet and not not GPIO.input(KNOP2):
-                    time.sleep(0.1)
-                    teller += 1
+                start_timestamp = time.time()
+
+                while True:
+                    status_knop2 = not GPIO.input(KNOP2)
+                    
+                    if not serve_status:
+                        break
+
+                    verstreken = time.time() - start_timestamp
+
+                    if verstreken >= serve_limiet or status_knop2:
+                        break
+
+                    percentage = verstreken / (serve_limiet)
+                    aantal_leds_aan = int(percentage * (LED_COUNT - SKIP_LEDS))
+
+                    alles_uit()
+
+                    for i in range(LED_COUNT - aantal_leds_aan, LED_COUNT):
+                        strip[i] = (255, 255, 255)
+
+                    strip.show()
+                    
+                    if (not druk_actief or not laser_actief) and geluid_actief:
+                        print("Fout")
+                        break
+                    elif not geluid_actief:
+                        print("Geen Fout")
+                        break
+                    
+                    time.sleep(0.05)
 
                 serve_actief = False
+                serve_status = False
                 druk_actief = True
                 laser_actief = True
                 geluid_actief = True
                 eind_tijd = datetime.now()
                 GPIO.output(LED, GPIO.HIGH)
+                alles_uit()
                 
                 DataRepository.patch_serve(eind_tijd=eind_tijd, serve_id=serve_id)
                 
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
-
-            time.sleep(0.1)
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_nieuwe_serve"),async_loop)
+                asyncio.run_coroutine_threadsafe(sio.emit("B2F_serve_status", {"status": serve_status, "stopTimeStamp": time.time() * 1000}),async_loop)
 
     except KeyboardInterrupt:
         print("Gestopt door keyboard")
@@ -577,6 +644,12 @@ async def connect(sid, environ):
     print("A new client connected")
 
     await sio.emit('B2F_connected', sid)
+
+@sio.on("F2B_serve_status")
+async def serve_status_event(sid, data):
+    global serve_status
+    
+    serve_status = data["status"]
 
 # ----------------------------------------------------
 # Run the app

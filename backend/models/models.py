@@ -16,7 +16,7 @@ class Serve(BaseModel):
     speler_id: int
     match_id: int
     start_tijd: datetime
-    eind_tijd: datetime
+    eind_tijd: datetime | None = None
     
 class Serves(BaseModel):
     serves: list[Serve]
@@ -86,7 +86,7 @@ class DTOServe(BaseModel):
     speler_id: int
     match_id: int
     start_tijd: datetime
-    eind_tijd: datetime
+    eind_tijd: datetime | None = None
     
 class DTOSensorEvent(BaseModel):
     serve_id: int

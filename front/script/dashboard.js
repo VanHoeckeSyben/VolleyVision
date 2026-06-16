@@ -107,6 +107,9 @@ const showLastMatch = (json) => {
         htmlLiveMatch.classList.add('u-active');
         htmlNieuweMatch.classList.add('u-disabled');
         htmlLiveMatch.href = `livematch.html?matchId=${json.match_id}`;
+    } else {
+        htmlLiveMatch.classList.remove('u-active');
+        htmlNieuweMatch.classList.remove('u-disabled');
     }
 }
 // #endregion

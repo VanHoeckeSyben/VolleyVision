@@ -180,3 +180,8 @@ class DataRepository:
     def read_last_match():
         sql = "SELECT match_id, active FROM Matchen ORDER BY match_id desc limit 1"
         return Database.get_one_row(sql)
+    
+    @staticmethod
+    def read_opslaggever():
+        sql = "SELECT match_id, speler_id FROM Opstellingen WHERE veld_positie = 1 ORDER BY match_id desc limit 1"
+        return Database.get_one_row(sql)
