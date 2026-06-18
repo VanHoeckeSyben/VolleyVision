@@ -1,0 +1,119 @@
+#include "DFRobot_LIDAR07.h"
+#include "BluetoothSerial.h"
+#include <math.h>
+
+BluetoothSerial SerialBT;
+DFRobot_LIDAR07_IIC LIDAR07;
+
+const int DRUKSENSOR = 39;
+const int GELUIDSENSOR = 35;
+
+const int DREMPELMIC = 100;
+const int DREMPELDRUK = 10;
+
+float amplitude;
+int minVal;
+int maxVal;
+unsigned long start;
+
+float value;
+float valueN;
+float maxKg = 10;
+float maxN;
+float lastValueN = 0;
+
+int distance = 0;
+int lastDistance = 0;
+String lastState;
+String state;
+
+float db = 0;
+int laserSensorAfstand = 1000;
+
+void setup() {
+  Serial.begin(115200);
+
+  while (!LIDAR07.begin()) {
+    Serial.println("The sensor returned data validation error");
+    delay(1000);
+  }
+
+  while (!LIDAR07.startFilter());
+  while (!LIDAR07.setMeasureMode(LIDAR07.eLidar07Continuous));
+  while (!LIDAR07.setConMeasureFreq(100));
+
+  LIDAR07.startMeasure();
+
+  SerialBT.begin("ESP32_VolleyVision");
+  Serial.println("Bluetooth ready");
+}
+
+float calculateDB(float amplitude) {
+  if (amplitude <= 0) return 0;
+
+  db = 20.0 * log10(amplitude);
+
+  db = db + 30.0;
+
+  return db;
+}
+
+void loop() {
+
+  if (LIDAR07.getValue()) {
+    distance = LIDAR07.getDistanceMM();
+
+    if ((lastDistance >= distance + 20) || (lastDistance <= distance - 20)) {
+      distance = LIDAR07.getDistanceMM();
+
+      if (distance <= laserSensorAfstand) {
+        state = "BEZET";
+      } else {
+        state = "VRIJ";
+      }
+
+      if (state != lastState) {
+        SerialBT.println("Lasersensor:" + state);
+        lastState = state;
+      }
+    }
+
+    lastDistance = distance;
+  }
+
+  minVal = 4095;
+  maxVal = 0;
+  start = millis();
+
+  while (millis() - start < 50) {
+    int sample = analogRead(GELUIDSENSOR);
+    if (sample < minVal) minVal = sample;
+    if (sample > maxVal) maxVal = sample;
+  }
+
+  amplitude = maxVal - minVal;
+
+  db = calculateDB(amplitude);
+
+  if (amplitude > DREMPELMIC) {
+    SerialBT.println("Geluidsensor:" + String(db) + "dB");
+  }
+
+  value = analogRead(DRUKSENSOR);
+  maxN = maxKg * 9.81;
+  valueN = (value / 4096.0) * maxN;
+
+  if (valueN > DREMPELDRUK) {
+    if (valueN != lastValueN) {
+        SerialBT.println("Druksensor:" + String(valueN) + "N");
+        lastValueN = valueN;
+    }
+  } else {
+      if (lastValueN != 0) {
+          SerialBT.println("Druksensor:0N");
+          lastValueN = 0;
+      }
+  }
+
+  delay(10);
+}
