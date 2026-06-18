@@ -67,6 +67,7 @@ druk_drempel = 10
 # Lifespan Manager (Startup/Shutdown)
 async def lifespan_manager(app: FastAPI):
     global async_loop
+    global lcd
     # Start background taken (process_queue + all_out) op in de applicatie
     async_loop = asyncio.get_running_loop()
 
@@ -84,8 +85,8 @@ async def lifespan_manager(app: FastAPI):
     # Geef controle aan FastAPI/Socket.IO
     yield
 
-    # TODO: GPIO cleanup and goodbye
     GPIO.cleanup()
+    lcd.clear()
     logger.info("GPIO cleaned up – bye!")
 
 
@@ -120,6 +121,18 @@ def gpio_keep_alive():
     
     c = None
     
+    def get_ip():
+        while True:
+            try:
+                out = out = check_output(["ip", "addr", "show", "wlan0"]).decode()
+                time.sleep(2)
+                for line in out.splitlines():
+                    line = line.strip()
+                    if line.startswith("inet "):
+                        return line.split()[1].split("/")[0]
+            except:
+                pass
+    
     def setup():
         global lcd
         global strip
@@ -129,10 +142,8 @@ def gpio_keep_alive():
         GPIO.output(LED, GPIO.HIGH)
         lcd = LCD()
         
-        ips = check_output(['hostname', '--all-ip-addresses'])
-        ip = ips.decode('utf-8').strip().split()[1]
-        
         lcd.message("VolleyVision", 1)
+        ip = get_ip()
         lcd.message(ip, 2)
         
         strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.3, auto_write=False)
