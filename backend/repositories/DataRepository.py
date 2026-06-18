@@ -155,6 +155,33 @@ class DataRepository:
     
     @staticmethod
     def read_serves_by_match_id(match_id):
-        sql = "SELECT s.serve_id, s.speler_id, s.match_id, s.start_tijd, s.eind_tijd, sp.voornaam, sp.naam, sp.rugnummer FROM Serves s JOIN Spelers sp ON s.speler_id = sp.speler_id WHERE s.match_id = %s ORDER BY s.start_tijd DESC"
+        sql = "SELECT s.serve_id, s.speler_id, s.match_id, s.start_tijd, s.eind_tijd, sp.voornaam, sp.naam, sp.rugnummer, s.voetfout FROM Serves s JOIN Spelers sp ON s.speler_id = sp.speler_id WHERE s.match_id = %s ORDER BY s.start_tijd DESC"
         params = [match_id]
         return Database.get_rows(sql, params)
+    
+    @staticmethod
+    def read_last_serve_id():
+        sql = "SELECT serve_id FROM Serves ORDER BY serve_id desc limit 1"
+        return Database.get_one_row(sql)
+    
+    @staticmethod
+    def patch_serve(eind_tijd, voetfout, serve_id):
+        sql = "UPDATE Serves SET eind_tijd = %s, voetfout = %s WHERE serve_id = %s"
+        params = [eind_tijd, voetfout, serve_id]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def stop_match(match_id):
+        sql = "UPDATE Matchen SET active = 0 WHERE match_id = %s"
+        params = [match_id]
+        return Database.execute_sql(sql, params)
+    
+    @staticmethod
+    def read_last_match():
+        sql = "SELECT match_id, active FROM Matchen ORDER BY match_id desc limit 1"
+        return Database.get_one_row(sql)
+    
+    @staticmethod
+    def read_opslaggever():
+        sql = "SELECT match_id, speler_id FROM Opstellingen WHERE veld_positie = 1 ORDER BY match_id desc limit 1"
+        return Database.get_one_row(sql)

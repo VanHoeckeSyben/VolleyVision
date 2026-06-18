@@ -15,12 +15,13 @@
         integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
         crossorigin="anonymous"></script>
     <script src="script/livematch.js"></script>
+    <script src="script/app.js"></script>
 </head>
 
 <body class="js-livematch">
     <header class="c-header">
         <div class="c-header__inner">
-            <h1 class="c-header__titel">VolleyVision</h1>
+            <h1 class="c-header__titel"><a class="c-header__titel" href="index.html">VolleyVision</a></h1>
             <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
@@ -32,8 +33,9 @@
                 <ul class="c-nav__list">
                     <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
                             href="index.html" data-navlink="Home">Home</a></li>
-                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink c-nav__actief"
-                            href="matchinstellen.html" data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a
+                            class="c-nav__link js-navlink c-nav__actief js-livematchmenu" href="matchinstellen.html"
+                            data-navlink="Match">Match</a></li>
                     <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink"
                             href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
                     </li>
@@ -94,7 +96,7 @@
 
                 <div class="c-servetime">
                     <span class="c-servetime__tijd js-serve-tijd">04.6s</span>
-                    <span class="c-servetime__max">max. 8 seconden</span>
+                    <span class="c-servetime__max js-serve-limiet">max. 8 seconden</span>
                     <div class="c-progress">
                         <div class="c-progress__bar js-serve-progress"></div>
                     </div>
@@ -125,26 +127,11 @@
                             <tr>
                                 <th>#</th>
                                 <th>Speler</th>
-                                <th>Duur</th>
                                 <th>Voetfout</th>
                                 <th>Tijd</th>
                             </tr>
                         </thead>
                         <tbody class="js-servelog">
-                            <tr>
-                                <td>1</td>
-                                <td>Jef P.</td>
-                                <td>03.2s</td>
-                                <td>Geen</td>
-                                <td>14:12:05</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Jonas</td>
-                                <td>09.2s</td>
-                                <td>Te lang</td>
-                                <td>14:15:19</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>

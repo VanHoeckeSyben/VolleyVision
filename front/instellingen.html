@@ -15,12 +15,13 @@
         integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
         crossorigin="anonymous"></script>
     <script src="script/instellingen.js"></script>
+    <script src="script/app.js"></script>
 </head>
 
 <body class="js-instellingen">
     <header class="c-header">
         <div class="c-header__inner">
-            <h1 class="c-header__titel">VolleyVision</h1>
+            <h1 class="c-header__titel"><a class="c-header__titel" href="index.html">VolleyVision</a></h1>
             <button class="c-header__menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="none" stroke="#E6F1FA" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round" class="lucide lucide-menu-icon lucide-menu">
@@ -32,8 +33,10 @@
                 <ul class="c-nav__list">
                     <li class="c-nav__listitem c-nav__listitem--home"><a class="c-nav__link js-navlink"
                             href="index.html" data-navlink="Home">Home</a></li>
-                    <li class="c-nav__listitem c-nav__listitem--match"><a class="c-nav__link js-navlink"
-                            href="matchinstellen.html" data-navlink="Match">Match</a></li>
+                    <li class="c-nav__listitem c-nav__listitem--match"><a
+                            class="c-nav__link js-navlink js-livematchmenu" href="matchinstellen.html"
+                            data-navlink="Match">Match</a>
+                    </li>
                     <li class="c-nav__listitem c-nav__listitem--spelers"><a class="c-nav__link js-navlink"
                             href="spelerslijst.html" data-navlink="Spelers">Spelers</a>
                     </li>

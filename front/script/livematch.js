@@ -8,10 +8,8 @@ const API = `http://${lanIP}/api/v1`;
 let htmlVorigeServerNummer, htmlVorigeServerNaam, htmlHuidigeServerNummer, htmlHuidigeServerNaam;
 let htmlVolgendeServerNummer, htmlVolgendeServerNaam, htmlVorigeServerBtn, htmlVolgendeServerBtn;
 let htmlStartServe, htmlServeTijd, htmlServeProgress, htmlVoetfoutStatus, htmlServeStatus, htmlServeLog;
-let htmlOpenWissel, htmlWisselModal, htmlCloseWissel, htmlSpelersVeld, htmlSpelersBank, htmlBevestigWissel;
-// #endregion
+let htmlOpenWissel, htmlWisselModal, htmlCloseWissel, htmlSpelersVeld, htmlSpelersBank, htmlBevestigWissel, htmlServeLimiet;
 
-// #region ***  Global variables                         ***********
 let matchId;
 let matchData;
 let opstelling = [];
@@ -22,13 +20,14 @@ let serveTeller = 0;
 let serveStartTijd;
 let geselecteerdeVeldSpeler = null;
 let geselecteerdeBankSpeler = null;
-// #endregion
+let serveStartTimestamp = null;
 
-// #region ***  Helpers                                  ***********
-const getMatchIdFromUrl = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('matchId');
-};
+let opslagGedaan = false;
+let isTerugGegaan = false;
+let magServeOpslaan = false;
+let stopVerstuurd = false;
+let serveLimiet = 0;
+// #endregion
 
 const formatDateTimeForApi = (date) => {
     const jaar = date.getFullYear();
@@ -41,20 +40,50 @@ const formatDateTimeForApi = (date) => {
     return `${jaar}-${maand}-${dag} ${uur}:${minuten}:${seconden}`;
 };
 
-const getSpelerOpPositie = (positie) => {
-    return opstelling.find((speler) => Number(speler.veld_positie) === Number(positie));
-};
-
-const getSpelerById = (spelerId) => {
-    let speler = opstelling.find((speler) => Number(speler.speler_id) === Number(spelerId));
-
-    if (!speler) {
-        speler = actieveSpelers.find((speler) => Number(speler.speler_id) === Number(spelerId));
+const formatTijd = (tijd) => {
+    if (!tijd) {
+        return 'Bezig';
     }
 
-    return speler;
+    const date = new Date(tijd.replace(' ', 'T'));
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 };
-// #endregion
+
+const serveStart = (startTimeStamp) => {
+    if (!serveActief) {
+        serveActief = true;
+        stopVerstuurd = false;
+        serveStartTimestamp = Date.now();
+        serveStartTijd = new Date(startTimeStamp);
+
+        showStopServeButton();
+
+        serveTimer = setInterval(() => {
+            serveTeller = (Date.now() - serveStartTimestamp) / 1000;
+
+            showServeTimer();
+        }, 100);
+    };
+}
+
+const serveStop = async () => {
+    if (!serveActief) {
+        return;
+    }
+
+    serveActief = false;
+    clearInterval(serveTimer);
+
+    serveTeller = 0;
+    stopVerstuurd = false;
+
+    showStartServeButton();
+
+    opslagGedaan = true;
+    magServeOpslaan = false;
+
+    await getServesByMatch();
+};
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showServers = () => {
@@ -80,7 +109,7 @@ const showServers = () => {
 const showServeTimer = () => {
     htmlServeTijd.innerHTML = `${serveTeller.toFixed(1)}s`;
 
-    let percentage = (serveTeller / 8) * 100;
+    let percentage = (serveTeller / serveLimiet) * 100;
 
     if (percentage > 100) {
         percentage = 100;
@@ -119,31 +148,24 @@ const showServeStatus = (voetfout) => {
 };
 
 const showServeLogs = (json) => {
+    const serves = json.match_serves;
     let htmlString = ``;
+    let fout = '';
+    
+    for (let serve of serves) {
+        if (serve.voetfout === 1) {
+            fout = 'Voetfout';
+        } else {
+            fout = 'Geen';
+        };
 
-    if (!json || !json.serves) {
-        htmlServeLog.innerHTML = ``;
-        return;
-    }
-
-    for (const serve of json.serves) {
-        const speler = getSpelerById(serve.speler_id);
-
-        const start = new Date(serve.start_tijd.replace(' ', 'T'));
-        const eind = new Date(serve.eind_tijd.replace(' ', 'T'));
-
-        const duur = (eind - start) / 1000;
-        const tijd = `${String(eind.getHours()).padStart(2, '0')}:${String(eind.getMinutes()).padStart(2, '0')}:${String(eind.getSeconds()).padStart(2, '0')}`;
-
-        htmlString += `
-            <tr>
+        htmlString += `<tr>
                 <td>${serve.serve_id}</td>
-                <td>${speler ? `#${speler.rugnummer} ${speler.voornaam}` : serve.speler_id}</td>
-                <td>${duur.toFixed(1)}s</td>
-                <td>${duur > 8 ? 'Te lang' : 'Geen'}</td>
-                <td>${tijd}</td>
+                <td>${serve.speler_rugnr} - ${serve.speler_voornaam} ${serve.speler_naam}</td>
+                <td>${fout}</td>
+                <td>${formatTijd(serve.start_tijd)}</td>
             </tr>`;
-    }
+    };
 
     htmlServeLog.innerHTML = htmlString;
 };
@@ -194,9 +216,32 @@ const showWisselSpelers = () => {
 
     listenToSelectWisselSpeler();
 };
+
+const showServeLimiet = () => {
+    htmlServeLimiet.innerHTML = `max. ${serveLimiet} seconden`
+};
 // #endregion
 
 // #region ***  Data Access - get___                     ***********
+const getMatchIdFromUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('matchId');
+};
+
+const getSpelerOpPositie = (positie) => {
+    return opstelling.find((speler) => Number(speler.veld_positie) === Number(positie));
+};
+
+const getSpelerById = (spelerId) => {
+    let speler = opstelling.find((speler) => Number(speler.speler_id) === Number(spelerId));
+
+    if (!speler) {
+        speler = actieveSpelers.find((speler) => Number(speler.speler_id) === Number(spelerId));
+    }
+
+    return speler;
+};
+
 const getMatch = async () => {
     const url = `${API}/matchen/${matchId}`;
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
@@ -225,35 +270,9 @@ const getActieveSpelers = async () => {
 const getServesByMatch = async () => {
     const url = `${API}/serves/matchen/${matchId}`;
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
-
-    if (!response || response.status === 404) {
-        showServeLogs({ serves: [] });
-        return;
-    }
-
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
+
     showServeLogs(json);
-};
-
-const getPostServe = async (spelerId, startTijd, eindTijd) => {
-    const body = JSON.stringify({
-        speler_id: Number(spelerId),
-        match_id: Number(matchId),
-        start_tijd: formatDateTimeForApi(startTijd),
-        eind_tijd: formatDateTimeForApi(eindTijd)
-    });
-
-    const url = `${API}/serves`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body
-    }).catch((err) => console.error('Fetch-error:', err));
-
-    const json = await response.json().catch((err) => console.error('JSON-error:', err));
-    console.log(json);
-
-    getServesByMatch();
 };
 
 const getPatchOpstelling = async (spelerId, veldPositie) => {
@@ -340,58 +359,57 @@ const getPatchWissel = async () => {
     showServers();
     showCloseWisselModal();
 };
+
+const getServeLimiet = async () => {
+    const url = `${API}/instellingen/4`;
+    const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
+    const json = await response.json().catch((err) => console.error('JSON-error:', err));
+
+    serveLimiet = json.value;
+};
+
+const getStopMatch = async () => {
+    const body = JSON.stringify({});
+    const url = `${API}/matchen/${matchId}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: body
+    }).catch((err) => console.error('Fetch-error:', err));
+    const json = await response.json().catch((err) => console.error('JSON-error:', err));
+}
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const stopServe = (voetfout) => {
-    if (!serveActief) {
-        return;
-    }
-
-    serveActief = false;
-    clearInterval(serveTimer);
-
-    const eindTijd = new Date();
-    const huidigeServer = getSpelerOpPositie(1);
-
-    showServeStatus(voetfout);
-    showStartServeButton();
-
-    getPostServe(huidigeServer.speler_id, serveStartTijd, eindTijd);
-};
-
 const listenToStartServe = () => {
     htmlStartServe.addEventListener('click', () => {
+        magServeOpslaan = true;
+
         if (!serveActief) {
-            serveActief = true;
-            serveTeller = 0;
-            serveStartTijd = new Date();
-
-            showServeTimer();
-            showServeStatus('Geen');
-            showStopServeButton();
-
-            serveTimer = setInterval(() => {
-                serveTeller += 0.1;
-                showServeTimer();
-
-                if (serveTeller >= 8) {
-                    stopServe('Te lang');
-                }
-            }, 100);
+            socketio.emit('F2B_serve_status', {'status': true});
         } else {
-            stopServe('Geen');
+            socketio.emit('F2B_serve_status', {'status': false});
         }
     });
 };
 
 const listenToServerButtons = () => {
-    htmlVolgendeServerBtn.addEventListener('click', () => {
-        getRotateVolgendeServer();
+    htmlVolgendeServerBtn.addEventListener('click', async () => {
+        if (opslagGedaan) {
+            await getRotateVolgendeServer();
+            opslagGedaan = false;
+            isTerugGegaan = false;
+            socketio.emit('F2B_volgende_speler', {'opslagGedaan': false, 'isTerugGegaan': false});
+        };
     });
 
-    htmlVorigeServerBtn.addEventListener('click', () => {
-        getRotateVorigeServer();
+    htmlVorigeServerBtn.addEventListener('click', async () => {
+        if (!opslagGedaan && !isTerugGegaan) {
+            await getRotateVorigeServer();
+            opslagGedaan = false;
+            isTerugGegaan = true;
+            socketio.emit('F2B_vorige_speler', {'opslagGedaan': false, 'isTerugGegaan': true});
+        };
     });
 };
 
@@ -450,8 +468,41 @@ const listenToStopButton = () => {
     const stopButton = document.querySelector('.js-stopmatch');
     stopButton.addEventListener('click', (e) => {
         window.location.href = `index.html`;
+        getStopMatch();
     })
 }
+
+const listenToSocket = () => {
+    socketio.on('B2F_nieuwe_serve', () => {
+        getServesByMatch();
+    });
+
+    socketio.on('B2F_serve_status', (json) => {
+        if (json.status) {
+            serveStart(json.startTimeStamp);
+        } else {
+            serveStop();
+        }
+    });
+
+    socketio.on('B2F_volgende_speler', async (json) => {
+        opslagGedaan = json.opslagGedaan;
+        isTerugGegaan = json.isTerugGegaan;
+        await getOpstelling();
+        showServers();
+    });
+
+    socketio.on('B2F_vorige_speler', async (json) => {
+        opslagGedaan = json.opslagGedaan;
+        isTerugGegaan = json.isTerugGegaan;
+        await getOpstelling();
+        showServers();
+    });
+
+    socketio.on('B2F_voetfout', (json) => {
+        showServeStatus(json.status);
+    });
+};
 // #endregion
 
 // #region ***  Init / DOMContentLoaded                  ***********
@@ -482,7 +533,13 @@ const init = async () => {
     htmlSpelersBank = document.querySelector('.js-spelers-bank');
     htmlBevestigWissel = document.querySelector('.js-bevestig-wissel');
 
+    htmlServeLimiet = document.querySelector('.js-serve-limiet');
+
     matchId = getMatchIdFromUrl();
+
+    await getServeLimiet();
+
+    showServeLimiet();
 
     if (!matchId) {
         alert('Geen matchId gevonden.');
@@ -492,10 +549,6 @@ const init = async () => {
     await getMatch();
     await getOpstelling();
     await getActieveSpelers();
-
-    if (Number(matchData.opslag_wij) === 0) {
-        await getRotateVolgendeServer();
-    }
 
     showServers();
     showServeTimer();
@@ -508,6 +561,7 @@ const init = async () => {
     listenToServerButtons();
     listenToWisselModal();
     listenToStopButton();
+    listenToSocket();
 };
 
 document.addEventListener('DOMContentLoaded', init);

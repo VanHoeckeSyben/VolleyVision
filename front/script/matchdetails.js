@@ -8,9 +8,6 @@ const API = `http://${lanIP}/api/v1`;
 let htmlMatchTitel, htmlMatchInfo, htmlDetailServes, htmlDetailFouten, htmlDetailPercentage, htmlServesPerSpeler, htmlFoutenPerSpeler, htmlDetailServesTable;
 
 let matchId;
-let match;
-let spelers = [];
-let serves = [];
 // #endregion
 
 const getMatchIdFromUrl = () => {
@@ -24,18 +21,16 @@ const formatDatum = (datum) => {
 };
 
 const formatTijd = (tijd) => {
+    if (!tijd) {
+        return 'Bezig';
+    }
+
     const date = new Date(tijd.replace(' ', 'T'));
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 };
 
-const berekenDuur = (startTijd, eindTijd) => {
-    const start = new Date(startTijd.replace(' ', 'T'));
-    const einde = new Date(eindTijd.replace(' ', 'T'));
-    return (einde - start) / 1000;
-};
-
 const isFout = (serve) => {
-    return berekenDuur(serve.start_tijd, serve.eind_tijd) > 8;
+    return Number(serve.voetfout) === 1;
 };
 
 const getSpelerById = (spelerId) => {
@@ -43,47 +38,46 @@ const getSpelerById = (spelerId) => {
 };
 
 // #region ***  Callback-Visualisation - show___         ***********
-const showMatch = (json) => {
-    match = json;
-    showDetailPage();
+const showMatchInfo = (json) => {
+    htmlMatchTitel.innerHTML = `Match ${json.match_id}`;
+    htmlMatchInfo.innerHTML = `${formatDatum(json.datum)}`;
 };
 
-const showSpelers = (json) => {
-    spelers = json.spelers;
-    showDetailPage();
-};
-
-const showServes = (json) => {
-    serves = json.serves;
-    showDetailPage();
-};
-
-const showMatchInfo = () => {
+const showServeInfo = (json) => {
+    const serves = json.match_serves;
     const aantalServes = serves.length;
     const aantalFouten = serves.filter((serve) => isFout(serve)).length;
     const percentage = aantalServes > 0 ? (aantalFouten / aantalServes) * 100 : 0;
 
-    htmlMatchTitel.innerHTML = `Match ${match.match_id}`;
-    htmlMatchInfo.innerHTML = `${formatDatum(match.datum)} · ${aantalServes} serves · ${aantalFouten} voetfouten`;
-
     htmlDetailServes.innerHTML = aantalServes;
     htmlDetailFouten.innerHTML = aantalFouten;
-    htmlDetailPercentage.innerHTML = `${percentage.toFixed(1)}%`;
-};
+    htmlDetailPercentage.innerHTML = `${percentage.toFixed(1)} %`;
+}
 
-const showPlayerBars = () => {
-    let spelerStats = [];
+const showPlayerBars = (json) => {
+    const serves = json.match_serves;
+    const spelerStats = [];
 
-    for (const speler of spelers) {
-        const servesVanSpeler = serves.filter((serve) => Number(serve.speler_id) === Number(speler.speler_id));
-        const foutenVanSpeler = servesVanSpeler.filter((serve) => isFout(serve));
+    for (const serve of serves) {
+        let stat = spelerStats.find((item) => Number(item.speler_id) === Number(serve.speler_id));
 
-        if (servesVanSpeler.length > 0) {
-            spelerStats.push({
-                speler: speler,
-                serves: servesVanSpeler.length,
-                fouten: foutenVanSpeler.length
-            });
+        if (!stat) {
+            stat = {
+                speler_id: serve.speler_id,
+                rugnummer: serve.speler_rugnr,
+                voornaam: serve.speler_voornaam,
+                naam: serve.speler_naam,
+                serves: 0,
+                fouten: 0
+            };
+
+            spelerStats.push(stat);
+        }
+
+        stat.serves++;
+
+        if (Number(serve.voetfout) === 1) {
+            stat.fouten++;
         }
     }
 
@@ -96,7 +90,7 @@ const showPlayerBars = () => {
     for (const stat of spelerStats) {
         htmlServesString += `
             <div class="c-playerbar">
-                <span class="c-playerbar__name">#${stat.speler.rugnummer} ${stat.speler.voornaam}</span>
+                <span class="c-playerbar__name">#${stat.rugnummer} ${stat.voornaam}</span>
                 <div class="c-playerbar__track">
                     <div class="c-playerbar__fill" style="width: ${(stat.serves / maxServes) * 100}%"></div>
                 </div>
@@ -105,7 +99,7 @@ const showPlayerBars = () => {
 
         htmlFoutenString += `
             <div class="c-playerbar">
-                <span class="c-playerbar__name">#${stat.speler.rugnummer} ${stat.speler.voornaam}</span>
+                <span class="c-playerbar__name">#${stat.rugnummer} ${stat.voornaam}</span>
                 <div class="c-playerbar__track">
                     <div class="c-playerbar__fill c-playerbar__fill--error" style="width: ${(stat.fouten / maxFouten) * 100}%"></div>
                 </div>
@@ -117,38 +111,27 @@ const showPlayerBars = () => {
     htmlFoutenPerSpeler.innerHTML = htmlFoutenString;
 };
 
-const showServesTable = () => {
+const showServeLogs = (json) => {
+    const serves = json.match_serves;
     let htmlString = ``;
-    let teller = 1;
+    let fout = '';
+    
+    for (let serve of serves) {
+        if (serve.voetfout === 1) {
+            fout = 'Voetfout';
+        } else {
+            fout = 'Geen';
+        };
 
-    for (const serve of serves) {
-        const speler = getSpelerById(serve.speler_id);
-        const duur = berekenDuur(serve.start_tijd, serve.eind_tijd);
-        const fout = isFout(serve);
-
-        htmlString += `
-            <tr>
-                <td>${teller}</td>
-                <td>${speler ? `#${speler.rugnummer} ${speler.voornaam}` : serve.speler_id}</td>
-                <td>${duur.toFixed(1)}s</td>
-                <td><span class="c-badge ${fout ? 'c-badge--error' : 'c-badge--success'}">${fout ? 'Fout' : 'Geen'}</span></td>
-                <td>${formatTijd(serve.eind_tijd)}</td>
+        htmlString += `<tr>
+                <td>${serve.serve_id}</td>
+                <td>${serve.speler_rugnr} - ${serve.speler_voornaam} ${serve.speler_naam}</td>
+                <td><span class="c-badge ${fout === 'Voetfout' ? 'c-badge--error' : 'c-badge--success'}">${fout}</span></td>
+                <td>${formatTijd(serve.start_tijd)}</td>
             </tr>`;
-
-        teller++;
-    }
+    };
 
     htmlDetailServesTable.innerHTML = htmlString;
-};
-
-const showDetailPage = () => {
-    if (!match || spelers.length === 0) {
-        return;
-    }
-
-    showMatchInfo();
-    showPlayerBars();
-    showServesTable();
 };
 // #endregion
 
@@ -158,29 +141,17 @@ const getMatch = async () => {
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
 
-    showMatch(json);
-};
-
-const getSpelers = async () => {
-    const url = `${API}/spelers`;
-    const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
-    const json = await response.json().catch((err) => console.error('JSON-error:', err));
-
-    showSpelers(json);
+    showMatchInfo(json);
 };
 
 const getServes = async () => {
     const url = `${API}/serves/matchen/${matchId}`;
     const response = await fetch(url).catch((err) => console.error('Fetch-error:', err));
-
-    if (!response || response.status === 404) {
-        showServes({ serves: [] });
-        return;
-    }
-
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
 
-    showServes(json);
+    showServeLogs(json);
+    showServeInfo(json);
+    showPlayerBars(json);
 };
 // #endregion
 
@@ -200,7 +171,6 @@ const init = () => {
     matchId = getMatchIdFromUrl();
 
     getMatch();
-    getSpelers();
     getServes();
 };
 

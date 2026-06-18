@@ -85,7 +85,7 @@ const getSaveSettings = async () => {
 };
 
 const getShutdownPi = async () => {
-    const url = `${API}/system/shutdown`;
+    const url = `${API}/systeem/afsluiten`;
 
     const response = await fetch(url, {
         method: 'POST'

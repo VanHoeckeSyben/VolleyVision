@@ -6,6 +6,7 @@ class Match(BaseModel):
     datum: date
     locatie: str
     opslag_wij: int
+    active: int
     
 class Matchen(BaseModel):
     matchen: list[Match]
@@ -15,7 +16,8 @@ class Serve(BaseModel):
     speler_id: int
     match_id: int
     start_tijd: datetime
-    eind_tijd: datetime
+    eind_tijd: datetime | None = None
+    voetfout: int
     
 class Serves(BaseModel):
     serves: list[Serve]
@@ -85,7 +87,8 @@ class DTOServe(BaseModel):
     speler_id: int
     match_id: int
     start_tijd: datetime
-    eind_tijd: datetime
+    eind_tijd: datetime | None = None
+    voetfout: int
     
 class DTOSensorEvent(BaseModel):
     serve_id: int
@@ -115,3 +118,21 @@ class DTOPatchOpstelling(BaseModel):
     
 class DTOPatchSpeler(BaseModel):
     actief: int
+    
+class LastMatch(BaseModel):
+    match_id: int
+    active: int
+    
+class MatchServe(BaseModel):
+    serve_id: int
+    speler_id: int
+    speler_naam: str
+    speler_voornaam: str
+    speler_rugnr: int
+    match_id: int
+    start_tijd: datetime
+    eind_tijd: datetime | None = None
+    voetfout: int
+    
+class MatchServes(BaseModel):
+    match_serves: list[MatchServe]
