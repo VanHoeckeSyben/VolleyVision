@@ -122,3 +122,17 @@ class DTOPatchSpeler(BaseModel):
 class LastMatch(BaseModel):
     match_id: int
     active: int
+    
+class MatchServe(BaseModel):
+    serve_id: int
+    speler_id: int
+    speler_naam: str
+    speler_voornaam: str
+    speler_rugnr: int
+    match_id: int
+    start_tijd: datetime
+    eind_tijd: datetime | None = None
+    voetfout: int
+    
+class MatchServes(BaseModel):
+    match_serves: list[MatchServe]

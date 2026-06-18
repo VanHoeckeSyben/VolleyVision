@@ -40,6 +40,15 @@ const formatDateTimeForApi = (date) => {
     return `${jaar}-${maand}-${dag} ${uur}:${minuten}:${seconden}`;
 };
 
+const formatTijd = (tijd) => {
+    if (!tijd) {
+        return 'Bezig';
+    }
+
+    const date = new Date(tijd.replace(' ', 'T'));
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+};
+
 const serveStart = (startTimeStamp) => {
     if (!serveActief) {
         serveActief = true;
@@ -139,10 +148,24 @@ const showServeStatus = (voetfout) => {
 };
 
 const showServeLogs = (json) => {
+    const serves = json.match_serves;
     let htmlString = ``;
+    let fout = '';
+    
+    for (let serve of serves) {
+        if (serve.voetfout === 1) {
+            fout = 'Voetfout';
+        } else {
+            fout = 'Geen';
+        };
 
-
-    console.log(json)
+        htmlString += `<tr>
+                <td>${serve.serve_id}</td>
+                <td>${serve.speler_rugnr} - ${serve.speler_voornaam} ${serve.speler_naam}</td>
+                <td>${fout}</td>
+                <td>${formatTijd(serve.start_tijd)}</td>
+            </tr>`;
+    };
 
     htmlServeLog.innerHTML = htmlString;
 };

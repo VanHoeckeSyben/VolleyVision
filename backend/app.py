@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException,  status
 from fastapi.middleware.cors import CORSMiddleware
 from repositories.DataRepository import DataRepository
-from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler, LastMatch
+from models.models import Match, Matchen, Serve, Serves, Speler, Spelers, Device, Devices, DeviceType, DeviceTypes, OpstellingSpeler, OpstellingSpelers, Instelling, Instellingen, DTOMatch, DTOSpeler, DTOOpstelling, DTOServe, DTOSensorEvent, SensorEvent, SensorEvents, DTOInstellingen, DTOPatchOpstelling, DTOPatchSpeler, LastMatch, MatchServe, MatchServes
 from RPi import GPIO
 from datetime import date, datetime
 from bluedot.btcomm import BluetoothClient
@@ -496,20 +496,20 @@ async def read_instelling(instelling_id: int):
 
     return Instelling(instelling_id=int(data["setting_id"]), naam=data["setting_naam"], value=data["setting_value"])
 
-@app.get(ENDPOINT + "/serves/matchen/{match_id}", response_model=Serves, summary="Ophalen van alle serves van een specifieke match")
+@app.get(ENDPOINT + "/serves/matchen/{match_id}", response_model=MatchServes, summary="Ophalen van alle serves van een specifieke match")
 async def read_serves_by_match_id(match_id: int):
     data = DataRepository.read_serves_by_match_id(match_id)
 
     if not data:
-        return Serves(serves=[])
+        return MatchServes(match_serves=[])
 
     list_serves = []
 
     for item in data:
-        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"], voetfout=item["voetfout"])
+        serve = MatchServe(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), speler_naam=item["naam"], speler_voornaam=item["voornaam"], speler_rugnr=int(item["rugnummer"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"], voetfout=item["voetfout"])
         list_serves.append(serve)
 
-    return Serves(serves=list_serves)
+    return MatchServes(match_serves=list_serves)
 
 # Toevoegen
 
