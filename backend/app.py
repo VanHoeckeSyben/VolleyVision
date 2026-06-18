@@ -53,6 +53,11 @@ serve_status = False
 ip_actief = True
 voetfout = False
 pwm = 0
+ledstrip_state = True
+last_ledstrip_state = True
+speaker_state = True
+geluid_drempel = 80
+druk_drempel = 10
 
 # ----------------------------------------------------
 # App setup
@@ -107,6 +112,11 @@ def gpio_keep_alive():
     global ip_actief
     global voetfout
     global pwm
+    global ledstrip_state
+    global last_ledstrip_state
+    global speaker_state
+    global geluid_drempel
+    global druk_drempel
     
     c = None
     
@@ -125,7 +135,7 @@ def gpio_keep_alive():
         lcd.message("VolleyVision", 1)
         lcd.message(ip, 2)
         
-        strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.5, auto_write=False)
+        strip = neopixel.NeoPixel(PIN, LED_COUNT, brightness=0.3, auto_write=False)
         
         pwm = GPIO.PWM(SPEAKERS, 100)
         pwm.start(0)
@@ -159,8 +169,11 @@ def gpio_keep_alive():
             print(regel)
 
             asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_sensoren", {"sensornaam": sensor, "value": value}),async_loop)
+            
+            druk_drempel = DataRepository.read_instelling_by_id(1)["setting_value"]
+            geluid_drempel = DataRepository.read_instelling_by_id(2)["setting_value"]
         
-            if sensor == "Druksensor" and serve_actief and druk_actief:
+            if sensor == "Druksensor" and serve_actief and druk_actief and float(value.replace("N", " ")) >= druk_drempel:
                 druk_actief = False
                 DataRepository.add_sensorevent(serve_id=serve_id, device_id=1, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
@@ -170,13 +183,23 @@ def gpio_keep_alive():
                 DataRepository.add_sensorevent(serve_id=serve_id, device_id=2, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                 
-            if sensor == "Geluidsensor" and serve_actief and geluid_actief:
+            if sensor == "Geluidsensor" and serve_actief and geluid_actief and float(value.replace("dB", " ")) >= geluid_drempel:
                 geluid_actief = False
                 DataRepository.add_sensorevent(serve_id=serve_id, device_id=3, waarde=value, event_tijd=datetime.now())
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
 
     try:
         while True:
+            ledstrip_state = DataRepository.read_instelling_by_id(3)["setting_value"]
+            speaker_state = DataRepository.read_instelling_by_id(5)["setting_value"]
+            
+            if ledstrip_state is not last_ledstrip_state:
+                if ledstrip_state:
+                    alles_aan((255, 255, 255))
+                    time.sleep(2)
+                    alles_uit()
+                last_ledstrip_state = ledstrip_state
+            
             if c is None:
                 try:
                     c = BluetoothClient("ESP32_VolleyVision", data_received)
@@ -225,10 +248,11 @@ def gpio_keep_alive():
 
                     alles_uit()
 
-                    for i in range(LED_COUNT - aantal_leds_aan, LED_COUNT):
-                        strip[i] = (255, 255, 255)
+                    if ledstrip_state:
+                        for i in range(LED_COUNT - aantal_leds_aan, LED_COUNT):
+                            strip[i] = (255, 255, 255)
 
-                    strip.show()
+                        strip.show()
                     
                     if (not druk_actief or not laser_actief) and geluid_actief:
                         print("Fout")
@@ -262,13 +286,17 @@ def gpio_keep_alive():
                 teller = 0
                 pwm.start(0)
                 while teller <= 10:
-                    alles_aan((255, 0, 0))
-                    time.sleep(0.1)
-                    alles_uit()
-                    time.sleep(0.1)
+                    if ledstrip_state:
+                        alles_aan((255, 0, 0))
+                        time.sleep(0.1)
+                        alles_uit()
+                        time.sleep(0.1)
                     
-                    pwm.ChangeDutyCycle(80)
-                    pwm.ChangeFrequency(120)
+                    if speaker_state:
+                        pwm.ChangeDutyCycle(80)
+                        pwm.ChangeFrequency(120)
+                        if not ledstrip_state:
+                            time.sleep(0.2)
                     
                     teller += 1
                 voetfout = False

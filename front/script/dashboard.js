@@ -20,7 +20,7 @@ const berekenDuur = (startTijd, eindTijd) => {
 };
 
 const isFout = (serve) => {
-    return berekenDuur(serve.start_tijd, serve.eind_tijd) > 8;
+    return Number(serve.voetfout) === 1;
 };
 
 // #region ***  Callback-Visualisation - show___         ***********
@@ -44,7 +44,7 @@ const showDashboard = () => {
 
 const showMiniChart = () => {
     const laatsteMatchen = [...matchen]
-        .sort((a, b) => new Date(a.datum) - new Date(b.datum))
+        .sort((a, b) => new Date(a.match_id) - new Date(b.match_id))
         .slice(-6);
 
     const data = [];
@@ -143,7 +143,7 @@ const getLastMatch = async () => {
     const json = await response.json().catch((err) => console.error('JSON-error:', err));
 
     showLastMatch(json);
-}
+};
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
@@ -156,7 +156,7 @@ const listenToSocket = () => {
     socketio.on('B2F_stop_match', (json) => {
         htmlLiveMatch.classList.remove('u-active');
         htmlNieuweMatch.classList.remove('u-disabled');
-    })
+    });
 };
 // #endregion
 
