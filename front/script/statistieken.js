@@ -42,7 +42,11 @@ const showFilters = () => {
         htmlSpelersString += `<option value="${speler.speler_id}">#${speler.rugnummer} ${speler.voornaam} ${speler.naam}</option>`;
     }
 
-    for (const match of matchen) {
+    let matchenMenu = JSON.parse(JSON.stringify(matchen));
+
+    matchenMenu = matchenMenu.sort((a, b) => b.match_id - a.match_id);
+
+    for (const match of matchenMenu) {
         htmlMatchenString += `<option value="${match.match_id}">${formatDatum(match.datum)} - Match ${match.match_id}</option>`;
     }
 
@@ -82,8 +86,18 @@ const showStatistieken = () => {
     showMatchenTable();
 };
 
+const formatUur = (tijd) => {
+    if (!tijd) {
+        return 'Bezig';
+    }
+
+    const date = new Date(tijd.replace(' ', 'T'));
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+};
+
 const showTrendGrafiek = () => {
     const spelerFilter = htmlFilterSpeler.value;
+    const matchFilter = htmlFilterMatch.value;
 
     let trendServes = serves;
 
@@ -94,12 +108,21 @@ const showTrendGrafiek = () => {
     const labels = [];
     const data = [];
 
-    for (const match of matchen) {
-        const servesVanMatch = trendServes.filter((serve) => Number(serve.match_id) === Number(match.match_id));
-        const foutenVanMatch = servesVanMatch.filter((serve) => isFout(serve)).length;
+    if (matchFilter !== 'all') {
+        trendServes = trendServes.filter((serve) => Number(serve.match_id) === Number(matchFilter));
 
-        labels.push(formatDatum(match.datum));
-        data.push(foutenVanMatch);
+        for (const serve of trendServes) {
+            labels.push(formatUur(serve.start_tijd));
+            data.push(isFout(serve) ? 1 : 0);
+        }
+    } else {
+        for (const match of matchen) {
+            const servesVanMatch = trendServes.filter((serve) => Number(serve.match_id) === Number(match.match_id));
+            const foutenVanMatch = servesVanMatch.filter((serve) => isFout(serve)).length;
+
+            labels.push(formatDatum(match.datum));
+            data.push(foutenVanMatch);
+        }
     }
 
     const options = {
@@ -113,7 +136,7 @@ const showTrendGrafiek = () => {
         colors: ['#F2C41C'],
         series: [
             {
-                name: 'Voetfouten',
+                name: matchFilter !== 'all' ? 'Voetfout per serve' : 'Voetfouten',
                 data: data
             }
         ],
@@ -122,6 +145,7 @@ const showTrendGrafiek = () => {
         },
         yaxis: {
             min: 0,
+            max: matchFilter !== 'all' ? 1 : undefined,
             forceNiceScale: true
         },
         stroke: {
@@ -215,7 +239,11 @@ const showMatchenTable = () => {
 
     let htmlString = ``;
 
-    for (const match of matchen) {
+    let matchenLijst = JSON.parse(JSON.stringify(matchen));
+
+    matchenLijst = matchenLijst.sort((a, b) => b.match_id - a.match_id);
+
+    for (const match of matchenLijst) {
         if (matchFilter !== 'all' && Number(match.match_id) !== Number(matchFilter)) {
             continue;
         }
