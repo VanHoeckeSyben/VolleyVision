@@ -18,3 +18,7 @@ starlette==0.41.3
 typing_extensions==4.12.2
 uvicorn==0.34.0
 wsproto==1.2.0
+bluedot==2.0.0
+Adafruit-Blinka==8.56.0
+adafruit-circuitpython-neopixel==6.3.15
+adafruit-blinka-raspberry-pi5-neopixel==1.0.0rc2
