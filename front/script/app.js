@@ -1,9 +1,5 @@
 'use strict';
 
-const lanIP = `${window.location.hostname}:8000`;
-const API = `http://127.0.0.1:8000/api/v1`
-const socketio = io(lanIP);
-
 // #region ***  DOM references                           ***********
 // #endregion
 
@@ -17,21 +13,27 @@ const socketio = io(lanIP);
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const listenToSocket = () => {
-  socketio.on('connect', () => {
-    console.log('verbonden met socket webserver');
-  });
+const listenToHamburgerMenu = () => {
+    const header = document.querySelector('.c-header');
+    const button = document.querySelector('.c-header__menu');
+
+    if (!header || !button) return;
+
+    button.addEventListener('click', () => {
+      console.log('Test');
+        header.classList.toggle('is-open');
+    });
 };
 // #endregion
 
 // #region ***  Init / DOMContentLoaded                  ***********
-const init = () => {
+const initAlgemeen = () => {
   console.info('DOM geladen');
 
-  listenToSocket();
+  listenToHamburgerMenu();
 
 };
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', initAlgemeen);
 
 // #endregion
