@@ -8,7 +8,7 @@ const API = `http://${lanIP}/api/v1`;
 let htmlVorigeServerNummer, htmlVorigeServerNaam, htmlHuidigeServerNummer, htmlHuidigeServerNaam;
 let htmlVolgendeServerNummer, htmlVolgendeServerNaam, htmlVorigeServerBtn, htmlVolgendeServerBtn;
 let htmlStartServe, htmlServeTijd, htmlServeProgress, htmlVoetfoutStatus, htmlServeStatus, htmlServeLog;
-let htmlOpenWissel, htmlWisselModal, htmlCloseWissel, htmlSpelersVeld, htmlSpelersBank, htmlBevestigWissel;
+let htmlOpenWissel, htmlWisselModal, htmlCloseWissel, htmlSpelersVeld, htmlSpelersBank, htmlBevestigWissel, htmlServeLimiet;
 
 let matchId;
 let matchData;
@@ -44,28 +44,37 @@ const serveStart = (startTimeStamp) => {
     if (!serveActief) {
         serveActief = true;
         stopVerstuurd = false;
-        serveStartTimestamp = startTimeStamp;
+        serveStartTimestamp = Date.now();
         serveStartTijd = new Date(startTimeStamp);
 
-        showServeStatus('Geen');
         showStopServeButton();
 
         serveTimer = setInterval(() => {
-            const nu = Date.now();
-            serveTeller = (nu - serveStartTimestamp) / 1000;
+            serveTeller = (Date.now() - serveStartTimestamp) / 1000;
 
             showServeTimer();
-
-            if (serveTeller >= 8 && !stopVerstuurd) {
-                stopVerstuurd = true;
-
-                socketio.emit('F2B_serve_status', {'status': false, 'voetfout': 'Te lang'});
-            }
         }, 100);
-    } else {
-        listenToStopServe('Geen');
-    }
+    };
 }
+
+const serveStop = async () => {
+    if (!serveActief) {
+        return;
+    }
+
+    serveActief = false;
+    clearInterval(serveTimer);
+
+    serveTeller = 0;
+    stopVerstuurd = false;
+
+    showStartServeButton();
+
+    opslagGedaan = true;
+    magServeOpslaan = false;
+
+    await getServesByMatch();
+};
 
 // #region ***  Callback-Visualisation - show___         ***********
 const showServers = () => {
@@ -91,7 +100,7 @@ const showServers = () => {
 const showServeTimer = () => {
     htmlServeTijd.innerHTML = `${serveTeller.toFixed(1)}s`;
 
-    let percentage = (serveTeller / 8) * 100;
+    let percentage = (serveTeller / serveLimiet) * 100;
 
     if (percentage > 100) {
         percentage = 100;
@@ -132,35 +141,8 @@ const showServeStatus = (voetfout) => {
 const showServeLogs = (json) => {
     let htmlString = ``;
 
-    if (!json || !json.serves) {
-        htmlServeLog.innerHTML = ``;
-        return;
-    }
 
-    for (const serve of json.serves) {
-        const speler = getSpelerById(serve.speler_id);
-
-        const start = new Date(serve.start_tijd.replace(' ', 'T'));
-
-        const eind = serve.eind_tijd
-            ? new Date(serve.eind_tijd.replace(' ', 'T'))
-            : new Date();
-
-        const duur = (eind - start) / 1000;
-
-        const tijd = serve.eind_tijd
-            ? `${String(eind.getHours()).padStart(2, '0')}:${String(eind.getMinutes()).padStart(2, '0')}:${String(eind.getSeconds()).padStart(2, '0')}`
-            : 'Bezig';
-
-        htmlString += `
-            <tr>
-                <td>${serve.serve_id}</td>
-                <td>${speler ? `#${speler.rugnummer} ${speler.voornaam}` : serve.speler_id}</td>
-                <td>${duur.toFixed(1)}s</td>
-                <td>${serve.eind_tijd ? (duur > 8 ? 'Te lang' : 'Geen') : 'Bezig'}</td>
-                <td>${tijd}</td>
-            </tr>`;
-    }
+    console.log(json)
 
     htmlServeLog.innerHTML = htmlString;
 };
@@ -210,6 +192,10 @@ const showWisselSpelers = () => {
     htmlSpelersBank.innerHTML = htmlBankString;
 
     listenToSelectWisselSpeler();
+};
+
+const showServeLimiet = () => {
+    htmlServeLimiet.innerHTML = `max. ${serveLimiet} seconden`
 };
 // #endregion
 
@@ -372,27 +358,6 @@ const getStopMatch = async () => {
 // #endregion
 
 // #region ***  Event Listeners - listenTo___            ***********
-const listenToStopServe = async (voetfout) => {
-    if (!serveActief) {
-        return;
-    }
-
-    serveActief = false;
-    clearInterval(serveTimer);
-
-    const eindTijd = new Date();
-    const huidigeServer = getSpelerOpPositie(1);
-
-    showServeStatus(voetfout);
-    showStartServeButton();
-
-    if (magServeOpslaan) {
-        magServeOpslaan = false;
-    }
-
-    opslagGedaan = true;
-};
-
 const listenToStartServe = () => {
     htmlStartServe.addEventListener('click', () => {
         magServeOpslaan = true;
@@ -411,6 +376,7 @@ const listenToServerButtons = () => {
             await getRotateVolgendeServer();
             opslagGedaan = false;
             isTerugGegaan = false;
+            socketio.emit('F2B_volgende_speler', {'opslagGedaan': false, 'isTerugGegaan': false});
         };
     });
 
@@ -419,6 +385,7 @@ const listenToServerButtons = () => {
             await getRotateVorigeServer();
             opslagGedaan = false;
             isTerugGegaan = true;
+            socketio.emit('F2B_vorige_speler', {'opslagGedaan': false, 'isTerugGegaan': true});
         };
     });
 };
@@ -491,8 +458,26 @@ const listenToSocket = () => {
         if (json.status) {
             serveStart(json.startTimeStamp);
         } else {
-            listenToStopServe(json.voetfout || 'Geen');
+            serveStop();
         }
+    });
+
+    socketio.on('B2F_volgende_speler', async (json) => {
+        opslagGedaan = json.opslagGedaan;
+        isTerugGegaan = json.isTerugGegaan;
+        await getOpstelling();
+        showServers();
+    });
+
+    socketio.on('B2F_vorige_speler', async (json) => {
+        opslagGedaan = json.opslagGedaan;
+        isTerugGegaan = json.isTerugGegaan;
+        await getOpstelling();
+        showServers();
+    });
+
+    socketio.on('B2F_voetfout', (json) => {
+        showServeStatus(json.status);
     });
 };
 // #endregion
@@ -525,9 +510,13 @@ const init = async () => {
     htmlSpelersBank = document.querySelector('.js-spelers-bank');
     htmlBevestigWissel = document.querySelector('.js-bevestig-wissel');
 
+    htmlServeLimiet = document.querySelector('.js-serve-limiet');
+
     matchId = getMatchIdFromUrl();
 
-    getServeLimiet();
+    await getServeLimiet();
+
+    showServeLimiet();
 
     if (!matchId) {
         alert('Geen matchId gevonden.');

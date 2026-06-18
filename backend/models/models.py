@@ -17,6 +17,7 @@ class Serve(BaseModel):
     match_id: int
     start_tijd: datetime
     eind_tijd: datetime | None = None
+    voetfout: int
     
 class Serves(BaseModel):
     serves: list[Serve]
@@ -87,6 +88,7 @@ class DTOServe(BaseModel):
     match_id: int
     start_tijd: datetime
     eind_tijd: datetime | None = None
+    voetfout: int
     
 class DTOSensorEvent(BaseModel):
     serve_id: int

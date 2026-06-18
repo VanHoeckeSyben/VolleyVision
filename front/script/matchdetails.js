@@ -24,18 +24,16 @@ const formatDatum = (datum) => {
 };
 
 const formatTijd = (tijd) => {
+    if (!tijd) {
+        return 'Bezig';
+    }
+
     const date = new Date(tijd.replace(' ', 'T'));
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 };
 
-const berekenDuur = (startTijd, eindTijd) => {
-    const start = new Date(startTijd.replace(' ', 'T'));
-    const einde = new Date(eindTijd.replace(' ', 'T'));
-    return (einde - start) / 1000;
-};
-
 const isFout = (serve) => {
-    return berekenDuur(serve.start_tijd, serve.eind_tijd) > 8;
+    return Number(serve.voetfout) === 1;
 };
 
 const getSpelerById = (spelerId) => {
@@ -123,14 +121,12 @@ const showServesTable = () => {
 
     for (const serve of serves) {
         const speler = getSpelerById(serve.speler_id);
-        const duur = berekenDuur(serve.start_tijd, serve.eind_tijd);
         const fout = isFout(serve);
 
         htmlString += `
             <tr>
                 <td>${teller}</td>
                 <td>${speler ? `#${speler.rugnummer} ${speler.voornaam}` : serve.speler_id}</td>
-                <td>${duur.toFixed(1)}s</td>
                 <td><span class="c-badge ${fout ? 'c-badge--error' : 'c-badge--success'}">${fout ? 'Fout' : 'Geen'}</span></td>
                 <td>${formatTijd(serve.eind_tijd)}</td>
             </tr>`;

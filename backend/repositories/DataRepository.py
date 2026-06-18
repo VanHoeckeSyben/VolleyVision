@@ -155,7 +155,7 @@ class DataRepository:
     
     @staticmethod
     def read_serves_by_match_id(match_id):
-        sql = "SELECT s.serve_id, s.speler_id, s.match_id, s.start_tijd, s.eind_tijd, sp.voornaam, sp.naam, sp.rugnummer FROM Serves s JOIN Spelers sp ON s.speler_id = sp.speler_id WHERE s.match_id = %s ORDER BY s.start_tijd DESC"
+        sql = "SELECT s.serve_id, s.speler_id, s.match_id, s.start_tijd, s.eind_tijd, sp.voornaam, sp.naam, sp.rugnummer, s.voetfout FROM Serves s JOIN Spelers sp ON s.speler_id = sp.speler_id WHERE s.match_id = %s ORDER BY s.start_tijd DESC"
         params = [match_id]
         return Database.get_rows(sql, params)
     
@@ -165,9 +165,9 @@ class DataRepository:
         return Database.get_one_row(sql)
     
     @staticmethod
-    def patch_serve(eind_tijd, serve_id):
-        sql = "UPDATE Serves SET eind_tijd = %s WHERE serve_id = %s"
-        params = [eind_tijd, serve_id]
+    def patch_serve(eind_tijd, voetfout, serve_id):
+        sql = "UPDATE Serves SET eind_tijd = %s, voetfout = %s WHERE serve_id = %s"
+        params = [eind_tijd, voetfout, serve_id]
         return Database.execute_sql(sql, params)
     
     @staticmethod

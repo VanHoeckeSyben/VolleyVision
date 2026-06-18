@@ -16,15 +16,8 @@ let chartTrend;
 let chartSpelers;
 // #endregion
 
-const berekenDuur = (startTijd, eindTijd) => {
-    const start = new Date(startTijd.replace(' ', 'T'));
-    const einde = new Date(eindTijd.replace(' ', 'T'));
-
-    return (einde - start) / 1000;
-};
-
 const isFout = (serve) => {
-    return berekenDuur(serve.start_tijd, serve.eind_tijd) > 8;
+    return Number(serve.voetfout) === 1;
 };
 
 const formatDatum = (datum) => {

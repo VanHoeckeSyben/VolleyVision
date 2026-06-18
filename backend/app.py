@@ -214,6 +214,10 @@ def gpio_keep_alive():
                     verstreken = time.time() - start_timestamp
 
                     if verstreken >= serve_limiet or status_knop2:
+                        if not status_knop2:
+                            asyncio.run_coroutine_threadsafe(sio.emit("B2F_voetfout", {"status": "Te Lang"}), async_loop)
+                        else:
+                            asyncio.run_coroutine_threadsafe(sio.emit("B2F_voetfout", {"status": "Geen"}), async_loop)
                         break
 
                     percentage = verstreken / (serve_limiet)
@@ -229,10 +233,12 @@ def gpio_keep_alive():
                     if (not druk_actief or not laser_actief) and geluid_actief:
                         print("Fout")
                         voetfout = True
+                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_voetfout", {"status": "Voetfout"}), async_loop)
                         break
                     elif not geluid_actief:
                         print("Geen Fout")
                         voetfout = False
+                        asyncio.run_coroutine_threadsafe(sio.emit("B2F_voetfout", {"status": "Geen"}), async_loop)
                         break
                     
                     time.sleep(0.05)
@@ -246,7 +252,7 @@ def gpio_keep_alive():
                 GPIO.output(LED, GPIO.HIGH)
                 alles_uit()
                 
-                DataRepository.patch_serve(eind_tijd=eind_tijd, serve_id=serve_id)
+                DataRepository.patch_serve(eind_tijd=eind_tijd, serve_id=serve_id, voetfout=voetfout)
                 
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_verandering_database", {}),async_loop)
                 asyncio.run_coroutine_threadsafe(sio.emit("B2F_nieuwe_serve"),async_loop)
@@ -346,7 +352,7 @@ async def read_alle_serves():
     
     list_serves = []
     for item in data:
-        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"])
+        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"], voetfout=int(item["voetfout"]))
         list_serves.append(serve)
         
     return Serves(serves=list_serves)
@@ -358,7 +364,7 @@ async def read_serve_by_id(serve_id: int):
     if not data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="serve niet gevonden")
         
-    return Serve(serve_id=int(data["serve_id"]), speler_id=int(data["speler_id"]), match_id=int(data["match_id"]), start_tijd=data["start_tijd"], eind_tijd=data["eind_tijd"])
+    return Serve(serve_id=int(data["serve_id"]), speler_id=int(data["speler_id"]), match_id=int(data["match_id"]), start_tijd=data["start_tijd"], eind_tijd=data["eind_tijd"], voetfout=int(data["voetfout"]))
 
 @app.get(ENDPOINT + "/spelers", response_model=Spelers, summary="Ophalen van alle spelers")
 async def read_alle_spelers():
@@ -500,7 +506,7 @@ async def read_serves_by_match_id(match_id: int):
     list_serves = []
 
     for item in data:
-        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"])
+        serve = Serve(serve_id=int(item["serve_id"]), speler_id=int(item["speler_id"]), match_id=int(item["match_id"]), start_tijd=item["start_tijd"], eind_tijd=item["eind_tijd"], voetfout=item["voetfout"])
         list_serves.append(serve)
 
     return Serves(serves=list_serves)
@@ -716,6 +722,14 @@ async def serve_status_event(sid, data):
     global serve_status
     
     serve_status = data["status"]
+
+@sio.on("F2B_volgende_speler")
+async def volgende_speler(sid, data):
+    await sio.emit("B2F_volgende_speler", data)
+    
+@sio.on("F2B_vorige_speler")
+async def volgende_speler(sid, data):
+    await sio.emit("B2F_volgende_speler", data)
 
 # ----------------------------------------------------
 # Run the app
